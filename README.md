@@ -2,12 +2,11 @@
 
 > 自动备份的 WorkBuddy 技能目录（SKILL.md）。
 
-- 顶层技能目录：**38** 个
+- 顶层技能目录：**37** 个
 - 合计 SKILL.md：**37** 个
 
 ## 顶层技能
 
-- `.git`
 - `bilibili-video-studio`
 - `cue-after-market-assistant`
 - `cue-ashare-research-expert`
