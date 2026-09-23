@@ -2,12 +2,12 @@
 
 > 自动备份的 WorkBuddy 技能目录（SKILL.md）。
 
-- 顶层技能目录：**37** 个
-- 连接器包（openjiuwen 副本）：**25** 个
-- 合计 SKILL.md：**62** 个
+- 顶层技能目录：**38** 个
+- 合计 SKILL.md：**37** 个
 
 ## 顶层技能
 
+- `.git`
 - `bilibili-video-studio`
 - `cue-after-market-assistant`
 - `cue-ashare-research-expert`
@@ -45,31 +45,3 @@
 - `cue-technical-analysis`
 - `douyin-video-studio`
 - `xiaohongshu-video-studio`
-
-## 连接器包 · cue-deep-research-连接器包/openjiuwen/skills
-
-- `cue-buddy`
-- `cue-capital-operations`
-- `cue-credit-diligence`
-- `cue-cross-border-legal`
-- `cue-data-mcp`
-- `cue-deep-verification`
-- `cue-equity-research`
-- `cue-financial-deep-read`
-- `cue-fund-advisory`
-- `cue-global-macro`
-- `cue-industry-research`
-- `cue-insurance-marketing`
-- `cue-ipo-research`
-- `cue-legal-compliance`
-- `cue-margin-trading`
-- `cue-market-cap-mgmt`
-- `cue-opportunity-mining`
-- `cue-overseas-expansion`
-- `cue-person-check`
-- `cue-post-loan-monitoring`
-- `cue-private-fund-dd`
-- `cue-research`
-- `cue-short-term-market`
-- `cue-us-research`
-- `cue-wealth-advisory`
