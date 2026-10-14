@@ -1,16 +1,16 @@
 ---
 name: xiaohongshu-video-studio
-displayName: 小红书短视频全解析
-description: 小红书短视频一站式解析与创作工场。用户直接输入小红书视频链接加一句简单要求即可：视频转文字（字幕/口播/画面内容）、内容分析总结、爆款视频拆解（按带货/流量逻辑拆结构分段、脚本类型、爆款归因、六维评分报告，照着学照着抄）、视频转脚本（镜头/运镜/转场/情绪/时间线/屏幕文字）、爆款脚本生成（原骨架改写成你的脚本，或按方向/目的/商品原创口播脚本，含分段表与六维质检评分）、视频提示词反推（画面和内容转成 agent 可理解的提示词）。底层经 Cue Omni Reader 远程端点解析（自动绕过小红书反爬），再由大模型按场景加工交付。
-description_zh: 小红书短视频全解析：链接直达，转文字/分析总结/爆款拆解六维评分/转脚本/脚本生成/提示词反推，六大场景全覆盖。
+displayName: 小红薯短视频全解析
+description: 小红薯短视频一站式解析与创作工场。用户直接输入小红薯视频链接加一句简单要求即可：视频转文字（字幕/口播/画面内容）、内容分析总结、爆款视频拆解（按带货/流量逻辑拆结构分段、脚本类型、爆款归因、六维评分报告，照着学照着抄）、视频转脚本（镜头/运镜/转场/情绪/时间线/屏幕文字）、爆款脚本生成（原骨架改写成你的脚本，或按方向/目的/商品原创口播脚本，含分段表与六维质检评分）、视频提示词反推（画面和内容转成 agent 可理解的提示词）。底层经 Cue Omni Reader 远程端点解析（自动绕过小红薯反爬），再由大模型按场景加工交付。
+description_zh: 小红薯短视频全解析：链接直达，转文字/分析总结/爆款拆解六维评分/转脚本/脚本生成/提示词反推，六大场景全覆盖。
 version: 1.2.0
 author: sensedeal
-tags: [xiaohongshu, 小红书, video, 短视频, 爆款拆解, 脚本生成, 视频转文字, 提示词反推, 内容创作, 带货, 口播, omni-reader]
+tags: [xiaohongshu, 小红薯, video, 短视频, 爆款拆解, 脚本生成, 视频转文字, 提示词反推, 内容创作, 带货, 口播, omni-reader]
 ---
 
-# 小红书短视频全解析
+# 小红薯短视频全解析
 
-> 输入一个小红书视频链接 + 一句需求，产出可直接使用的文字稿、拆解报告、分镜脚本、原创脚本或生成提示词。管线：**Cue Omni Reader 远程端点（解析）→ 大模型（场景化加工）→ 交付**。
+> 输入一个小红薯视频链接 + 一句需求，产出可直接使用的文字稿、拆解报告、分镜脚本、原创脚本或生成提示词。管线：**Cue Omni Reader 远程端点（解析）→ 大模型（场景化加工）→ 交付**。
 
 ## 隐私与数据传输说明
 
@@ -33,11 +33,11 @@ tags: [xiaohongshu, 小红书, video, 短视频, 爆款拆解, 脚本生成, 视
 | 6 | 视频提示词反推 | 反推提示词 / prompt / 提示词 | 风格提示词 + 分镜提示词序列 + TTS 文案 + 结构化 JSON |
 
 **路由规则**：
-- **仅在用户同时提供小红书视频链接时激活**：表中「总结一下 / 分析 / 帮我写脚本」等说法，只有伴随小红书视频链接才触发本技能；无链接的普通对话不激活。
+- **仅在用户同时提供小红薯视频链接时激活**：表中「总结一下 / 分析 / 帮我写脚本」等说法，只有伴随小红薯视频链接才触发本技能；无链接的普通对话不激活。
 - 命中多个意图可组合执行（如「拆解并改写成我的脚本」= 场景3 → 场景5）。
 - **只给 URL 无明确要求**：默认执行场景 1（精简版）+ 一段内容速览，然后附场景菜单询问是否深入（「需要我进一步做爆款拆解 / 转脚本 / 改写成你的脚本吗？」），不要擅自跑深度场景。
 - 多个 URL：逐个解析（每次一个），报告可合并交付。
-- **图文笔记 ≠ 视频笔记**：小红书笔记分图文（多图无视频）和视频（单视频）。本技能只解析视频笔记；给的是图文笔记链接时，先告知用户「这条是图文笔记、没有视频可解析」，不要硬跑。
+- **图文笔记 ≠ 视频笔记**：小红薯笔记分图文（多图无视频）和视频（单视频）。本技能只解析视频笔记；给的是图文笔记链接时，先告知用户「这条是图文笔记、没有视频可解析」，不要硬跑。
 ---
 
 ## 前置依赖（新用户首次使用只需做这一件事）
@@ -50,8 +50,8 @@ tags: [xiaohongshu, 小红书, video, 短视频, 爆款拆解, 脚本生成, 视
 
   如确需落盘，可写 `~/.cue/config.json`（格式 `{"api_key": "sk你的key"}`）。
 
-- **远程端点直连（无需本地 Bridge、无需配置 MCP）**：小红书视频解析只走远程端点 `https://mcp.cuecue.cn/api/omni-reader/mcp/`（streamable-http），鉴权头 `Authorization: Bearer <Cue Key>`。不依赖 `~/.mcp.json` 注册 MCP，也不装本地 Bridge；本地 Bridge 仅在降级方案中使用。
-- 手动调用依赖：`curl`（Python 参考实现另需 `python3`，仅标准库）。实际使用时 Agent 自动完成解析，用户只需给一个小红书视频链接 + 一句需求。
+- **远程端点直连（无需本地 Bridge、无需配置 MCP）**：小红薯视频解析只走远程端点 `https://mcp.cuecue.cn/api/omni-reader/mcp/`（streamable-http），鉴权头 `Authorization: Bearer <Cue Key>`。不依赖 `~/.mcp.json` 注册 MCP，也不装本地 Bridge；本地 Bridge 仅在降级方案中使用。
+- 手动调用依赖：`curl`（Python 参考实现另需 `python3`，仅标准库）。实际使用时 Agent 自动完成解析，用户只需给一个小红薯视频链接 + 一句需求。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key，**禁止声称"我去生成/查看"**。
 >
@@ -93,8 +93,8 @@ echo "=== 3/3 curl ===" && { command -v curl >/dev/null && echo "就绪" || echo
 健康检查三项全绿 = 环境就绪，但**这是配置流程的终点，不是任务的终点**。三项全绿后若用户还没给出具体任务，**必须主动把用户推向第一次真实调用**，不要停在"环境已就绪"：
 
 > 环境已就绪 ✅ 下面这些都可以直接跑，比如：
-> 1. "帮我解析这篇小红书视频 <链接>，转成文字稿并做爆款拆解（六维评分）"
-> 2. "把这个小红书爆款拆解成可复用的脚本，再反推它的提示词"
+> 1. "帮我解析这篇小红薯视频 <链接>，转成文字稿并做爆款拆解（六维评分）"
+> 2. "把这个小红薯爆款拆解成可复用的脚本，再反推它的提示词"
 >
 > 挑一个发给我，或直接把你手头的需求告诉我，我现在就跑。
 
@@ -106,11 +106,11 @@ echo "=== 3/3 curl ===" && { command -v curl >/dev/null && echo "就绪" || echo
 
 ## 关键技术事实（必读）
 
-1. **小红书视频 URL 必须走 Cue 远程端点**：`https://mcp.cuecue.cn/api/omni-reader/mcp/`（streamable-http）。小红书 Web 是纯 SPA，笔记正文与视频地址经 JS 动态加载，接口还需 `x-s`/`x-t` 签名，本地 Bridge 提交小红书 URL 会立即被拒；远程端点由 Cue 服务端抓取，可正常解析。
+1. **小红薯视频 URL 必须走 Cue 远程端点**：`https://mcp.cuecue.cn/api/omni-reader/mcp/`（streamable-http）。小红薯 Web 是纯 SPA，笔记正文与视频地址经 JS 动态加载，接口还需 `x-s`/`x-t` 签名，本地 Bridge 提交小红薯 URL 会立即被拒；远程端点由 Cue 服务端抓取，可正常解析。
 2. **远程端点仅 3 个工具**：`parse` / `get_parse_status` / `cancel_parse`，无 `read_result`。结果在 `get_parse_status` 返回 `completed` 时**内联携带**（`result` 字段）。
 3. **`detail` 只能用 `text`**：`grounded`/`layout` 在远程报 `UNSUPPORTED_DETAIL`。`text` 模式的结果已含关键帧画面文字（`[画面 mm:ss]` 标注）+ ASR 口播稿（`[说话人N mm:ss]` 标注）。
 4. **信封解析**：`tools/call` 返回是 MCP 信封 `{content:[{type:"text",text:"<JSON字符串>"}]}`，必须先取 `content[].text` 再 `json.loads`，否则状态字段永远读不到。响应为 SSE 流（`data: ` 前缀行）。
-5. **耗时预期**：小红书是短视频（一般 ≤3 分钟，长的一般也不超 15 分钟），通常 1-3 分钟解析完成；工作日 9:00-10:00 / 16:00-18:00 高峰期可能排队 3-8 分钟。**提交前必须告知用户预计等待时长**（如「这条 1 分钟的视频，预计 1-3 分钟出结果，高峰期可能排队」），避免用户误判卡死。
+5. **耗时预期**：小红薯是短视频（一般 ≤3 分钟，长的一般也不超 15 分钟），通常 1-3 分钟解析完成；工作日 9:00-10:00 / 16:00-18:00 高峰期可能排队 3-8 分钟。**提交前必须告知用户预计等待时长**（如「这条 1 分钟的视频，预计 1-3 分钟出结果，高峰期可能排队」），避免用户误判卡死。
 
 
 ---
@@ -130,9 +130,20 @@ echo "=== 3/3 curl ===" && { command -v curl >/dev/null && echo "就绪" || echo
 
 告知用户等待时长后，调用 `parse`（参考实现见「解析调用手册」）。返回 `{"status":"processing","operation_id":"op_..."}`，记下 `operation_id`。
 
+> **唯一提交（纪律第一条）**：一次任务对同一 URL **只调用一次 `parse`**。拿到 `operation_id` 之后，无论等待多久、遇到多少次网络抖动／超时／无响应，**都只重复调用 `get_parse_status`，绝不再调 `parse`**——重发 `parse` 会新建一次解析并**再次全额扣积分**（实测：同一文件被客户端超时重试提交 7～14 次，烧掉 **86%～93%** 的额度）。同步等待与异步轮询**不要同时进行**，任一时刻只有一个提交/轮询在途。
+
 ### 步骤 2：轮询取回
 
-循环调用 `get_parse_status`（`wait_ms: 20000`），`status=completed` 后从 `result` 字段取出全文。解析结果的三类原料：
+循环调用 `get_parse_status`（`wait_ms: 20000`），`status=completed` 后从 `result` 字段取出全文。
+
+**轮询纪律**：
+- 已有 `operation_id` 时**只轮询状态，绝不重发 `parse`**；两次之间按返回的 `poll_after_seconds`（缺省 10s）退避，轮询总时长建议上限 20 分钟。
+- 轮询中出现**网络错误／超时／无响应**：按 5s → 20s → 60s 退避，重试**同一个 `get_parse_status`**，**不要重发 `parse`**。
+- `status: failed` 且 `retryable=true` 才可重试；重试前先用 `get_parse_status` 复用既有 operation，**确无可用 operation** 才重新 `parse`。
+- **`operation_id` 丢失**（脚本崩溃、上下文丢失）：属**含糊超时**，重提前必须告知用户「重提会新建一次解析、可能重复扣费」并取得确认。
+- 出现**未识别的状态**：保留该操作，**不要重提**、也不要声称已完成／已取消。
+
+解析结果的三类原料：
 
 - `[画面 mm:ss] ...` —— 关键帧画面 OCR 文字（标题卡、字幕条、贴纸文字）
 - `[说话人N mm:ss] ...` —— ASR 口播全文
@@ -285,7 +296,7 @@ echo "=== 3/3 curl ===" && { command -v curl >/dev/null && echo "就绪" || echo
 curl -sS -X POST "https://mcp.cuecue.cn/api/omni-reader/mcp/" \
   -H "Authorization: Bearer $(python3 -c "import json;print(json.load(open('$HOME/.cue/config.json'))['api_key'])")" \
   -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"parse","arguments":{"source":"<小红书规范URL>","detail":"text"}}}'
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"parse","arguments":{"source":"<小红薯规范URL>","detail":"text"}}}'
 
 # ② 轮询（每 15-20 秒一次，直到 status=completed）
 #    arguments 换成 {"operation_id":"op_xxx","wait_ms":20000}
@@ -318,11 +329,16 @@ def call(name, args, timeout=70):
             raise RuntimeError(json.dumps(r.get("error","unknown"), ensure_ascii=False))
     raise RuntimeError("无响应")
 
-st = call("parse", {"source": url, "detail": "text"})     # 提交
+st = call("parse", {"source": url, "detail": "text"})     # 唯一一次提交，之后绝不再调 parse
 op  = st.get("operation_id")
-while st.get("status") == "processing":                    # 轮询
+deadline = time.time() + 1200                              # 轮询上限 20 分钟，避免无限等待
+while st.get("status") == "processing" and time.time() < deadline:
     time.sleep(min(st.get("poll_after_seconds", 10) or 10, 15))
-    st = call("get_parse_status", {"operation_id": op, "wait_ms": 20000})
+    try:
+        st = call("get_parse_status", {"operation_id": op, "wait_ms": 20000})
+    except Exception:
+        time.sleep(5)                                      # 网络抖动 → 重试状态查询，绝不重发 parse
+        continue
 r = st.get("result")
 text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or ""
 ```
@@ -331,8 +347,8 @@ text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or "
 
 | 错误码 | 含义 | 处理 |
 |--------|------|------|
-| `REMOTE_REQUEST_REJECTED` | 多半是误走了本地 Bridge，或 URL 非规范小红书链接 | 确认走远程端点、URL 已预处理 |
-| `SERVICE_TEMPORARILY_UNAVAILABLE` | 服务临时不可用（`retryable:true`） | 等 10 秒重新提交同一请求 |
+| `REMOTE_REQUEST_REJECTED` | 多半是误走了本地 Bridge，或 URL 非规范小红薯链接 | 确认走远程端点、URL 已预处理 |
+| `SERVICE_TEMPORARILY_UNAVAILABLE` | 服务临时不可用（`retryable:true`） | 等 10 秒后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`** |
 | `UNSUPPORTED_DETAIL` | 传了 `grounded`/`layout` | 改回 `detail:"text"` |
 | `SOURCE_TOO_LARGE` / 超长视频 | 超出上限 | 引导用户确认是否继续（短视频一般不会触发） |
 | `INSUFFICIENT_CREDITS` | 积分不足 | **按「积分不足专项提示」主动引导**（充值 / 邀请好友得积分 / 等次日免费额度） |
@@ -354,9 +370,9 @@ text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or "
 
 ## 降级方案（远程端点长时间不可用时）
 
-远程端点不可达时，本技能**无免登录公开直链降级路径**——小红书视频直链需登录 + `x-s`/`x-t` 签名，涉及浏览器 Cookie/登录态的本地下载方式本技能不采用。建议：
+远程端点不可达时，本技能**无免登录公开直链降级路径**——小红薯视频直链需登录 + `x-s`/`x-t` 签名，涉及浏览器 Cookie/登录态的本地下载方式本技能不采用。建议：
 
-- **稍后重试**：`SERVICE_TEMPORARILY_UNAVAILABLE`（`retryable:true`）时等 10 秒重新提交同一请求；偶发过载通常几分钟内恢复。
+- **稍后重试**：`SERVICE_TEMPORARILY_UNAVAILABLE`（`retryable:true`）时等 10 秒后用**原 `operation_id` 轮询** `get_parse_status` 复用（**不要重发 `parse`**）；确无 operation 才重新提交。偶发过载通常几分钟内恢复。
 - **换时段**：避开工作日 9:00-10:00 / 16:00-18:00 高峰，错峰解析更稳。
 - 若为**本地已有视频文件**，可经本地 Bridge（`OMNI_ALLOWED_ROOTS` 授权目录内）以 `detail:"text"` 解析，需用户确认文件路径。
 
@@ -377,13 +393,13 @@ text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or "
 
 **Q: 用户直接丢了个 xhslink.cn 短链？** Omni 不认短链，先展开再提交。注意短链服务对 HEAD 返回 404，要用 GET + `-L` 跟随重定向：`curl -s -o /dev/null -w "%{url_effective}" -L "<短链>"`，从最终 URL 取 `{note_id}` 与 `xsec_token`。
 
-**Q: 链接打开是图文笔记，没有视频？** 小红书笔记分图文和视频两种，本技能只解析视频笔记。直接告知用户「这条是图文笔记、没有视频可解析」，不要硬跑。
+**Q: 链接打开是图文笔记，没有视频？** 小红薯笔记分图文和视频两种，本技能只解析视频笔记。直接告知用户「这条是图文笔记、没有视频可解析」，不要硬跑。
 
 **Q: 解析结果只有口播没有画面文字？** 该视频可能没有文字版面（纯真人出镜口播，或画面文字太花识别不出）。`detail:"text"` 已是画面信息最全的模式，`layout`/`grounded` 当前不可用，勿再尝试。
 
-**Q: 视频很长（>15 分钟）？** 小红书以短视频为主，长视频少见。若遇到，先告知用户解析耗时更长，确认后再提交。
+**Q: 视频很长（>15 分钟）？** 小红薯以短视频为主，长视频少见。若遇到，先告知用户解析耗时更长，确认后再提交。
 
-**Q: 积分/额度？** 与 cue-omni-reader 共用：新用户 500 积分 + 每天 10 免费积分，同一视频重复解析会复用结果不重复扣费。提示积分不足时，两个办法：**推荐邀请好友**——打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取专属邀请链接，好友加入后你**再得 500 积分**；或前往 [cuecue.cn/pay](https://cuecue.cn/pay) 充值（首次充值有优惠），也可等次日免费额度。
+**Q: 积分/额度？** 与 cue-omni-reader 共用：新用户 500 积分 + 每天 10 免费积分，同一任务请**只提交一次 `parse`**——重复提交会新建一次解析并**再次计费**，不会自动去重。提示积分不足时，两个办法：**推荐邀请好友**——打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取专属邀请链接，好友加入后你**再得 500 积分**；或前往 [cuecue.cn/pay](https://cuecue.cn/pay) 充值（首次充值有优惠），也可等次日免费额度。
 
 **Q: 想要的不是转录稿，而是爆款脚本？** 用场景 5：先说「改写成我的脚本」或给方向/目的/商品，或先跑场景 3 拿骨架再改写。
 

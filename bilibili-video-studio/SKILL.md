@@ -131,9 +131,18 @@ echo "=== 3/3 curl ===" && { command -v curl >/dev/null && echo "就绪" || echo
 
 告知用户等待时长后，调用 `parse`（参考实现见「解析调用手册」）。返回 `{"status":"processing","operation_id":"op_..."}`，记下 `operation_id`。
 
+> **唯一提交（纪律第一条）**：一次任务对同一 URL **只调用一次 `parse`**。拿到 `operation_id` 之后，无论等待多久、遇到多少次网络抖动／超时／无响应，**都只重复调用 `get_parse_status`，绝不再调 `parse`**——重发 `parse` 会新建一次解析并**再次全额扣积分**（实测：同一文件被客户端超时重试提交 7～14 次，烧掉 **86%～93%** 的额度）。同步等待与异步轮询**不要同时进行**，任一时刻只有一个提交/轮询在途。
+
 ### 步骤 2：轮询取回
 
 循环调用 `get_parse_status`（`wait_ms: 20000`），`status=completed` 后从 `result` 字段取出全文。
+
+**轮询纪律**：
+- 已有 `operation_id` 时**只轮询状态，绝不重发 `parse`**；两次之间按返回的 `poll_after_seconds`（缺省 10s）退避，轮询总时长建议上限 20 分钟。
+- 轮询中出现**网络错误／超时／无响应**：按 5s → 20s → 60s 退避，重试**同一个 `get_parse_status`**，**不要重发 `parse`**。
+- `status: failed` 且 `retryable=true` 才可重试；重试前先用 `get_parse_status` 复用既有 operation，**确无可用 operation** 才重新 `parse`。
+- **`operation_id` 丢失**（脚本崩溃、上下文丢失）：属**含糊超时**，重提前必须告知用户「重提会新建一次解析、可能重复扣费」并取得确认。
+- 出现**未识别的状态**：保留该操作，**不要重提**、也不要声称已完成／已取消。
 
 > **拿到结果第一时间落盘**：把解析全文原样写入 `<BV号>_raw.md`（或工作区等价文件）。这是后续所有加工步骤的唯一事实源——一旦步骤 3 的模型调用中断，可以从它原地重试，**不必也不许重新提交 `parse`**（重跑 = 白等 3-8 分钟 + 重复扣积分）。长视频尤其不能省这一步。
 
@@ -396,11 +405,16 @@ def call(name, args, timeout=70):
             raise RuntimeError(json.dumps(r.get("error","unknown"), ensure_ascii=False))
     raise RuntimeError("无响应")
 
-st = call("parse", {"source": url, "detail": "text"})     # 提交
+st = call("parse", {"source": url, "detail": "text"})     # 唯一一次提交，之后绝不再调 parse
 op  = st.get("operation_id")
-while st.get("status") == "processing":                    # 轮询
+deadline = time.time() + 1200                              # 轮询上限 20 分钟，避免无限等待
+while st.get("status") == "processing" and time.time() < deadline:
     time.sleep(min(st.get("poll_after_seconds", 10) or 10, 15))
-    st = call("get_parse_status", {"operation_id": op, "wait_ms": 20000})
+    try:
+        st = call("get_parse_status", {"operation_id": op, "wait_ms": 20000})
+    except Exception:
+        time.sleep(5)                                      # 网络抖动 → 重试状态查询，绝不重发 parse
+        continue
 r = st.get("result")
 text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or ""
 ```
@@ -422,7 +436,7 @@ text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or "
 | 错误码 | 含义 | 处理 |
 |--------|------|------|
 | `REMOTE_REQUEST_REJECTED` | 多半是误走了本地 Bridge，或 URL 非规范 BV 链接 | 确认走远程端点、URL 已预处理 |
-| `SERVICE_TEMPORARILY_UNAVAILABLE` | 服务临时不可用（`retryable:true`） | 等 10 秒重新提交同一请求 |
+| `SERVICE_TEMPORARILY_UNAVAILABLE` | 服务临时不可用（`retryable:true`） | 等 10 秒后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`** |
 | `UNSUPPORTED_DETAIL` | 传了 `grounded`/`layout` | 改回 `detail:"text"` |
 | `SOURCE_TOO_LARGE` / 超长视频 | >30 分钟或超出上限 | 引导用户按分P/剪辑分段 |
 | `INSUFFICIENT_CREDITS` | 积分不足 | **按「积分不足专项提示」主动引导**（充值 / 邀请好友得积分 / 等次日免费额度） |
@@ -493,7 +507,7 @@ text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or "
 
 **Q: 要 B 站官方 CC 字幕文件？** 官方 CC 字幕需平台登录态，本技能不处理；Omni 的 ASR 结果通常已够用。
 
-**Q: 积分/额度？** 与 cue-omni-reader 共用：新用户 500 积分 + 每天 10 免费积分，同一视频重复解析会复用结果不重复扣费。提示积分不足时，两个办法：**推荐邀请好友**——打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取专属邀请链接，好友加入后你**再得 500 积分**；或前往 [cuecue.cn/pay](https://cuecue.cn/pay) 充值（首次充值有优惠），也可等次日免费额度。
+**Q: 积分/额度？** 与 cue-omni-reader 共用：新用户 500 积分 + 每天 10 免费积分，同一任务请**只提交一次 `parse`**——重复提交会新建一次解析并**再次计费**，不会自动去重。提示积分不足时，两个办法：**推荐邀请好友**——打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取专属邀请链接，好友加入后你**再得 500 积分**；或前往 [cuecue.cn/pay](https://cuecue.cn/pay) 充值（首次充值有优惠），也可等次日免费额度。
 
 **Q: 想要的不是转录稿，而是题号+标准答案的备考笔记？** 用场景 8：直接说「按题号+标准答案整理成备考笔记」并附 URL。解析原料里 `[画面]` 的题目卡是权威答案，`[说话人N]` 口播用于补全无画面的题目并清洗误识。
 

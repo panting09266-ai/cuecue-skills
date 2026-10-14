@@ -3,7 +3,7 @@ name: cue-omni-reader
 displayName: Omni Reader 多模态文件解析
 description: 输入URL或上传文件（PDF/Office/图片/扫描件/音视频/网页/压缩包等不限定文件格式），将任意文档/文件/网页内容解析为Markdown，即插即用、默认不落盘，具有极高隐私保护。可精准还原文档目录结构和复杂表格结构，适用于高精度高性能要求的文档处理OCR任务；可将音视频内容一键解析转化为文字稿，并具备画面视觉理解能力，适用于视频转脚本、主流视频网站url提取ppt等场景。
 description_zh: Cue Omni Reader：视频多模态理解、视觉理解、文档解析，PDF/Office/图片/扫描件/音视频/网页/压缩包转 Markdown。
-version: 1.8.0
+version: 1.8.6
 author: sensedeal
 tags: [cue, omni-reader, video-understanding, vision, multimodal, ocr, document-parsing, mcp, 视频解析, 视觉理解, 多模态, 文档解析, OCR]
 ---
@@ -99,6 +99,15 @@ Omni 暴露七个公共工具：
 - **本地 Bridge**：完成后用 `read_result` 逐段读回（`result_id` 位于完成返回的 `result` 对象内，用 `cursor`/`max_bytes` 翻页），`save_result` 导出稳定副本，最后 `discard_result` 清理。
 - **远程端点**：无 `read_result` 等工具，结果在 `get_parse_status` 返回 `completed` 时内联携带（取 `result` 字段文本）。
 
+> **唯一提交（纪律第一条）**：一次任务对同一 `source` **只调用一次 `parse`**。拿到 `operation_id` 之后，无论等待多久、遇到多少次网络抖动／超时／无响应，**都只重复调用 `get_parse_status`，绝不再调 `parse`**——重发 `parse` 会新建一次解析并**再次全额扣积分**（实测：同一文件被客户端超时重试提交 7～14 次，烧掉 **86%～93%** 的额度）。同步等待与异步轮询**不要同时进行**，任一时刻只有一个提交/轮询在途。
+
+**轮询纪律**：
+- 已有 `operation_id` 时**只轮询状态，绝不重发 `parse`**；两次之间按返回的 `poll_after_seconds`（缺省 10s）退避，轮询总时长建议上限 20 分钟。
+- 轮询中出现**网络错误／超时／无响应**：按 5s → 20s → 60s 退避，重试**同一个 `get_parse_status`**，**不要重发 `parse`**。
+- `status: failed` 且 `retryable=true` 才可重试；重试前先用 `get_parse_status` 复用既有 operation，**确无可用 operation** 才重新 `parse`。
+- **`operation_id` 丢失**（脚本崩溃、上下文丢失）：属**含糊超时**，重提前必须告知用户「重提会新建一次解析、可能重复扣费」并取得确认。
+- 出现**未识别的状态**：保留该操作，**不要重提**、也不要声称已完成／已取消。
+
 **调用注意**：`tools/call` 的返回是 MCP 信封 `{content:[{type:"text",text:"<JSON 字符串>"}]}`，必须先取 `content[].text` 再 `json.loads`，否则状态字段永远读不到。
 
 
@@ -113,7 +122,7 @@ Omni 是一个逻辑提供方，`parse(source)` 同时覆盖 HTTP(S) URL 与已�
 **手动安装 Bridge（仅在需要时运行，不包含 API Key）：**
 
 ```bash
-npx -y @cueai/omni-reader-mcp@1.8.0 setup
+npx -y @cueai/omni-reader-mcp@1.8.6 setup
 ```
 
 Agent 配置（`~/.claude/mcp.json`）：
@@ -123,7 +132,7 @@ Agent 配置（`~/.claude/mcp.json`）：
   "mcpServers": {
     "omni-reader": {
       "command": "npx",
-      "args": ["-y", "@cueai/omni-reader-mcp@1.8.0"],
+      "args": ["-y", "@cueai/omni-reader-mcp@1.8.6"],
       "env": {
         "CUE_API_KEY": "<your-api-key>",
         "OMNI_ALLOWED_ROOTS": "<允许解析的本地目录，冒号分隔>"
@@ -137,7 +146,7 @@ Agent 配置（`~/.claude/mcp.json`）：
 
 > "用 Omni 解析 ./report.pdf"
 
-**验证**：`npx -y @cueai/omni-reader-mcp@1.8.0 doctor --json`
+**验证**：`npx -y @cueai/omni-reader-mcp@1.8.6 doctor --json`
 
 **更新与卸载：**
 
@@ -146,7 +155,7 @@ Agent 配置（`~/.claude/mcp.json`）：
 npx -y @cueai/omni-reader-mcp@latest setup
 
 # 卸载 Bridge
-npx -y @cueai/omni-reader-mcp@1.8.0 uninstall --yes --json
+npx -y @cueai/omni-reader-mcp@1.8.6 uninstall --yes --json
 ```
 
 > **仅远程（URL-only，无需本地安装）**：已有公开或签名 HTTPS URL、且不解析本地文件时，可不用 Bridge，直接配置远程 MCP。它是同一提供方的 URL-only 形态，读不了本地文件：
@@ -183,11 +192,11 @@ Agent 应根据用户输入的 `source` 类型与目标站点特征选择接入�
 
 本 Skill 是 Omni Reader MCP 服务的使用说明书，**实际解析由 Cue 远程服务完成**。以下情况非本 Skill 问题：
 
-- 网络波动导致 MCP 超时 → 重试或换时段
+- 网络波动导致 MCP 超时 → 用**原 `operation_id` 轮询 `get_parse_status`** 复用（**不要重发 `parse`**），或换时段
 - 服务端临时过载 → 等 5-15 分钟
 - 外部数据源不响应 → Cue 会返回结构化错误而非静默失败
 
-服务端返回结构化错误（含错误码和 `retryable` 标记），可根据标记决定是否重试。详见下方错误码速查。
+服务端返回结构化错误（含错误码和 `retryable` 标记），可根据标记决定是否重试——**重试一律指「用原 `operation_id` 轮询 `get_parse_status` 复用」，不要重发 `parse`**。详见下方错误码速查。
 
 ### 性能预期
 
@@ -201,7 +210,7 @@ Agent 应根据用户输入的 `source` 类型与目标站点特征选择接入�
 
 > 工作日 9:00-10:00 / 16:00-18:00 为高峰期，大文件可能排队 5-15 分钟。夜间和周末 Cue 后端可能有维护窗口。
 
-> **主动告知等待时长**：解析音视频或大文件前，先按上表告知用户预计耗时（如「这段约 27 分钟的视频，预计 3-8 分钟，高峰期可能排队 5-15 分钟」），避免用户误判卡死而重复上传。
+> **主动告知等待时长**：解析音视频或大文件前，先按上表告知用户预计耗时（如「这段约 27 分钟的视频，预计 3-8 分钟，高峰期可能排队 5-15 分钟」），避免用户误判卡死而重复上传。用户觉得「像卡住了」时，应**用原 `operation_id` 轮询 `get_parse_status`**，而非重新提交 `parse`。
 
 ### 错误码速查
 
@@ -213,13 +222,13 @@ Omni MCP 返回结构化错误，包含 `code`（错误码）、`failure_scope`�
 | `SOURCE_TOO_LARGE` | 单文件超过 256 MiB 上限 | ❌ | 拆分文件后分别解析 |
 | `UNSUPPORTED_MEDIA_TYPE` | 文件格式不在覆盖范围 | ❌ | 转换为支持格式，参考能力范围表 |
 | `LOCAL_BRIDGE_REQUIRED` | 本地文件需要安装 Bridge | ❌（需确认） | 提示后安装，或手动 `npx setup` |
-| `TIMEOUT` | 解析超时（>3 分钟无进度） | ✅ | 重试 1 次；仍超时则拆分文件或换时段 |
-| `NETWORK_ERROR` | 网络连接中断 | ✅ | 等待 30 秒后重试，最多 3 次 |
-| `SERVER_OVERLOADED` | 服务端过载 | ✅（延迟） | 等 5 分钟后重试，避开高峰期 |
+| `TIMEOUT` | 解析超时（>3 分钟无进度） | ✅ | 用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`**；仍超时则拆分文件或换时段 |
+| `NETWORK_ERROR` | 网络连接中断 | ✅ | 等 30 秒后重试**同一个 `get_parse_status`**（复用原 operation），**不要重发 `parse`**；最多 3 次 |
+| `SERVER_OVERLOADED` | 服务端过载 | ✅（延迟） | 等 5 分钟后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`** |
 | `INSUFFICIENT_CREDITS` | 积分不足 | ❌ | **按「积分不足专项提示」主动引导**（充值 / 邀请好友得积分 / 等次日免费额度） |
 | `RATE_LIMITED` | 请求频率过高 | ✅（延迟） | 等 30 秒降低频率 |
 | `REMOTE_REQUEST_REJECTED` | 远程抓取请求被拒（反爬站点 URL 经本地 Bridge 提交时常见） | ❌ | 改用远程端点提交同一 URL，见「路由规则」 |
-| `SERVICE_TEMPORARILY_UNAVAILABLE` | 解析服务临时不可用 | ✅（延迟） | 稍等后重新提交同一请求 |
+| `SERVICE_TEMPORARILY_UNAVAILABLE` | 解析服务临时不可用 | ✅（延迟） | 稍等后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`** |
 | `UNSUPPORTED_DETAIL` | 远程端点不支持 `grounded`/`layout` 细节 | ❌ | 远程仅 markdown 输出，去掉 `detail` 或改用 `text` |
 | `DETAIL_CAPABILITIES_UNAVAILABLE` | 本地 Bridge 不支持 `grounded`/`layout` 细节 | ❌ | 改用 `detail:"text"` |
 
@@ -238,11 +247,12 @@ Omni MCP 返回结构化错误，包含 `code`（错误码）、`failure_scope`�
 
 ### 重试建议
 
-- 网络类错误（`NETWORK_ERROR`）→ 等 30s，最多重试 3 次
-- 过载类错误（`SERVER_OVERLOADED`）→ 等 5min，换时段
+- **总则（必读）**：任何「重试」都指**用原 `operation_id` 轮询 `get_parse_status` 复用**；**绝不重发 `parse`**——重发会新建一次解析并全额再扣积分，服务端**不会自动去重**。只有确无可用 operation 时才重新 `parse`。
+- 网络类错误（`NETWORK_ERROR`）→ 等 30s 后重试**同一个 `get_parse_status`**（复用原 operation），最多 3 次
+- 过载类错误（`SERVER_OVERLOADED`）→ 等 5min 后用**原 `operation_id` 轮询复用**，换时段
 - 格式/大小问题 → 转换或拆分文件后重试
 - 积分不足 → 主动提示邀请链接（首页左下角）或充值或等次日
-- Bridge 未装 → `npx -y @cueai/omni-reader-mcp@1.8.0 setup`
+- Bridge 未装 → `npx -y @cueai/omni-reader-mcp@1.8.6 setup`
 - 重试 3 次仍失败 → 记下 request_id，走降级方案
 
 ---
@@ -330,7 +340,7 @@ echo "=== 3/3 Node.js ===" && node -v 2>/dev/null && npx -v 2>/dev/null && echo 
 开始任何解析任务前，先跑一次轻量版本自检：
 
 ```bash
-npx -y @cueai/omni-reader-mcp@1.8.0 doctor --silent-check
+npx -y @cueai/omni-reader-mcp@1.8.6 doctor --silent-check
 ```
 
 单行 JSON 输出，按 `version_check.status` 决定动作：
@@ -346,7 +356,7 @@ npx -y @cueai/omni-reader-mcp@1.8.0 doctor --silent-check
 
 **`outdated` 时的提示话术（必须执行）**：输出里的 `upgrade` 字段已是完整可用的升级命令，**原样转达，不要自己拼命令，也不要改版本号**：
 
-> 检测到 Omni Reader 有新版本（当前 1.8.0 → 最新 1.9.0），建议升级：
+> 检测到 Omni Reader 有新版本（当前 1.8.6 → 最新 1.9.0），建议升级：
 > `npx -y @cueai/omni-reader-mcp@1.9.0 setup`
 > 升级只重装本地 Bridge，不影响已解析的结果。需要我现在帮你执行吗？
 
@@ -382,7 +392,7 @@ npx -y @cueai/omni-reader-mcp@1.8.0 doctor --silent-check
 | 现象 | 排查方向 | 处理 |
 |------|---------|------|
 | Agent 说连不上 Omni | MCP 服务是否正常运行 | 跑健康检查三段诊断 |
-| 等很久没反应 | 大文件或高峰期 | 先跑诊断确认服务在线；超 15 分钟则重试 |
+| 等很久没反应 | 大文件或高峰期 | 先跑诊断确认服务在线；超 15 分钟则**用原 `operation_id` 轮询 `get_parse_status`**（**不要重发 `parse`**） |
 | 解析结果看起来缺内容 | 复杂排版/跨页切分 | 换 `hypertext` 输出，或分页解析 |
 | 视频解析只有字幕没有画面描述 | 输出模式 | `detail:"text"` 的结果已含关键帧画面文字（`[画面 mm:ss]` 标注）；`grounded`/`layout` 当前远程与本地均不可用（分别报 `UNSUPPORTED_DETAIL` / `DETAIL_CAPABILITIES_UNAVAILABLE`），勿再尝试；远程可试 `output: "hypertext"` |
 | oss:// 链接报错 | 裸 oss URL | 先转换为签名 HTTPS URL 再传 |
@@ -395,7 +405,7 @@ npx -y @cueai/omni-reader-mcp@1.8.0 doctor --silent-check
 | 工作日 9:00-16:00 | 最佳时段，3-8 分钟完成 |
 | 夜间/周末 | 可能有维护，跑前先诊断 |
 | 首次使用 | 跑健康检查三段诊断确认环境就绪 |
-| 连续失败 ≥2 次 | 停 15 分钟，记下 request_id 后重试 |
+| 连续失败 ≥2 次 | 停 15 分钟，记下 request_id 后**用原 `operation_id` 轮询复用**（不要重发 `parse`） |
 
 ---
 
@@ -419,13 +429,13 @@ Cue Omni Reader 长时间不可达时的手动替代渠道：
 A: 安装前会征得用户确认。Bridge 仅访问用户指定的文件/目录，不会扫描其他位置。本地模式下文件不经过 Cue 服务端，默认 `no_store=true`。
 
 **Q: 解析失败了怎么办？**
-A: MCP 返回结构化错误（含错误码、失败范围、是否可重试、用户操作建议），根据错误类型即可判断——超时可重试、格式不支持则转换、积分不足则前往 [cuecue.cn/pay](https://cuecue.cn/pay) 充值（首次充值有优惠）。
+A: MCP 返回结构化错误（含错误码、失败范围、是否可重试、用户操作建议），根据错误类型即可判断——超时可**用原 `operation_id` 轮询 `get_parse_status` 复用**（**不要重发 `parse`**）、格式不支持则转换、积分不足则前往 [cuecue.cn/pay](https://cuecue.cn/pay) 充值（首次充值有优惠）。
 
 **Q: 解析出来的表格是 HTML 源码（`<table>`）看不懂？**
 A: 交付前应先把 HTML 表格转成 Markdown 表格（管道符形式）。需要 Excel / Word / PDF 时，用 pandoc 把 Markdown 转成 docx/pdf，或用 pandas 生成 `.xlsx`。
 
 **Q: 怎么更新 Bridge？**
-A: 重跑 `npx -y @cueai/omni-reader-mcp@latest setup` 即更新到最新版；若只想重装当前版本，把 `@latest` 换成对应版本号（如 `@1.8.0`）。卸载用 `npx -y @cueai/omni-reader-mcp uninstall`。
+A: 重跑 `npx -y @cueai/omni-reader-mcp@latest setup` 即更新到最新版；若只想重装当前版本，把 `@latest` 换成对应版本号（如 `@1.8.6`）。卸载用 `npx -y @cueai/omni-reader-mcp uninstall`。
 
 **Q: 为什么不能传 oss:// URL？**
 A: `parse` 的 `source` 接受 HTTP(S) URL 或已授权本地路径；URL 需可公开访问（或签名 HTTPS URL），裸 `oss://` 请先转换为签名 URL。

@@ -145,9 +145,20 @@ echo "=== 3/3 curl ===" && { command -v curl >/dev/null && echo "就绪" || echo
 
 告知用户等待时长后，调用 `parse`（参考实现见「解析调用手册」）。返回 `{"status":"processing","operation_id":"op_..."}`，记下 `operation_id`。
 
+> **唯一提交（纪律第一条）**：一次任务对同一 URL **只调用一次 `parse`**。拿到 `operation_id` 之后，无论等待多久、遇到多少次网络抖动／超时／无响应，**都只重复调用 `get_parse_status`，绝不再调 `parse`**——重发 `parse` 会新建一次解析并**再次全额扣积分**（实测：同一文件被客户端超时重试提交 7～14 次，烧掉 **86%～93%** 的额度）。同步等待与异步轮询**不要同时进行**，任一时刻只有一个提交/轮询在途。
+
 ### 步骤 2：轮询取回
 
-循环调用 `get_parse_status`（`wait_ms: 20000`），`status=completed` 后从 `result` 字段取出全文。解析结果的三类原料：
+循环调用 `get_parse_status`（`wait_ms: 20000`），`status=completed` 后从 `result` 字段取出全文。
+
+**轮询纪律**：
+- 已有 `operation_id` 时**只轮询状态，绝不重发 `parse`**；两次之间按返回的 `poll_after_seconds`（缺省 10s）退避，轮询总时长建议上限 20 分钟。
+- 轮询中出现**网络错误／超时／无响应**：按 5s → 20s → 60s 退避，重试**同一个 `get_parse_status`**，**不要重发 `parse`**。
+- `status: failed` 且 `retryable=true` 才可重试；重试前先用 `get_parse_status` 复用既有 operation，**确无可用 operation** 才重新 `parse`。
+- **`operation_id` 丢失**（脚本崩溃、上下文丢失）：属**含糊超时**，重提前必须告知用户「重提会新建一次解析、可能重复扣费」并取得确认。
+- 出现**未识别的状态**：保留该操作，**不要重提**、也不要声称已完成／已取消。
+
+解析结果的三类原料：
 
 - `[画面 mm:ss] ...` —— 关键帧画面 OCR 文字与视觉描述（**注意误识别风险，见事实 9**）
 - `[说话人N mm:ss] ...` —— ASR 口播全文（**权威来源**）
@@ -352,13 +363,18 @@ def resolve_real(url):
     return url
 
 url   = resolve_real("<用户给的抖音URL>")
-st    = call("parse", {"source": url, "detail": "text"})   # 提交
+st    = call("parse", {"source": url, "detail": "text"})   # 唯一一次提交，之后绝不再调 parse
 op    = st.get("operation_id")
 if not op:
     raise RuntimeError("提交失败：" + json.dumps(st, ensure_ascii=False))
-while st.get("status") == "processing":                      # 轮询
+deadline = time.time() + 1200                              # 轮询上限 20 分钟，避免无限等待
+while st.get("status") == "processing" and time.time() < deadline:
     time.sleep(min(st.get("poll_after_seconds", 10) or 10, 15))
-    st = call("get_parse_status", {"operation_id": op, "wait_ms": 20000})
+    try:
+        st = call("get_parse_status", {"operation_id": op, "wait_ms": 20000})
+    except Exception:
+        time.sleep(5)                                      # 网络抖动 → 重试状态查询，绝不重发 parse
+        continue
 r = st.get("result")
 text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or ""
 # text 即解析全文（含 [说话人 mm:ss] 与 [画面 mm:ss]）
@@ -370,7 +386,7 @@ text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or "
 |--------|------|------|
 | `PARSE_FAILED`（`file_uploaded:false`，提交 `v.douyin.com` 短链时高发） | 短链未展开，远程端点连抓取都没成功 | 用浏览器 UA 展开短链为 `iesdouyin.com/share/video/<id>/` 后重试；`retryable:false` 但换真实 URL 可成功 |
 | `REMOTE_REQUEST_REJECTED` | 多半是误走了本地 Bridge，或 URL 非规范抖音链接 | 确认走远程端点、URL 已预处理展开 |
-| `SERVICE_TEMPORARILY_UNAVAILABLE` | 服务临时不可用（`retryable:true`） | 等 10 秒重新提交同一请求 |
+| `SERVICE_TEMPORARILY_UNAVAILABLE` | 服务临时不可用（`retryable:true`） | 等 10 秒后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`** |
 | `UNSUPPORTED_DETAIL` | 传了 `grounded`/`layout` | 改回 `detail:"text"` |
 | `SOURCE_TOO_LARGE` / 超长视频 | 超出上限 | 引导用户确认是否继续（抖音长解说偶发） |
 | `INSUFFICIENT_CREDITS` | 积分不足 | **按「积分不足专项提示」主动引导**（充值 / 邀请好友得积分 / 等次日免费额度） |
@@ -394,7 +410,7 @@ text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or "
 
 远程端点不可达时，本技能**无免登录公开直链降级路径**——抖音视频直链需平台登录态与签名，涉及浏览器 Cookie/登录态的本地下载方式本技能不采用。建议：
 
-- **稍后重试**：`SERVICE_TEMPORARILY_UNAVAILABLE`（`retryable:true`）时等 10 秒重新提交同一请求；偶发过载通常几分钟内恢复。
+- **稍后重试**：`SERVICE_TEMPORARILY_UNAVAILABLE`（`retryable:true`）时等 10 秒后用**原 `operation_id` 轮询** `get_parse_status` 复用（**不要重发 `parse`**）；确无 operation 才重新提交。偶发过载通常几分钟内恢复。
 - **换时段**：避开工作日 9:00-10:00 / 16:00-18:00 高峰，错峰解析更稳。
 - 若为**本地已有视频文件**，可经本地 Bridge（`OMNI_ALLOWED_ROOTS` 授权目录内）以 `detail:"text"` 解析，需用户确认文件路径。
 
@@ -427,7 +443,7 @@ text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or "
 
 **Q: 视频很长（>15 分钟）？** 抖音影视解说经常 5–15 分钟甚至更长。若遇到，先告知用户解析耗时更长（可能 8 分钟以上），确认后再提交。
 
-**Q: 积分/额度？** 与 cue-omni-reader 共用：新用户 500 积分 + 每天 10 免费积分，同一视频重复解析会复用结果不重复扣费。提示积分不足时，两个办法：**推荐邀请好友**——打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取专属邀请链接，好友加入后你**再得 500 积分**；或前往 [cuecue.cn/pay](https://cuecue.cn/pay) 充值（首次充值有优惠），也可等次日免费额度。
+**Q: 积分/额度？** 与 cue-omni-reader 共用：新用户 500 积分 + 每天 10 免费积分，同一任务请**只提交一次 `parse`**——重复提交会新建一次解析并**再次计费**，不会自动去重。提示积分不足时，两个办法：**推荐邀请好友**——打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取专属邀请链接，好友加入后你**再得 500 积分**；或前往 [cuecue.cn/pay](https://cuecue.cn/pay) 充值（首次充值有优惠），也可等次日免费额度。
 
 **Q: 想要的不是转录稿，而是爆款脚本？** 用场景 5：先说「改写成我的脚本」或给方向/目的/商品，或先跑场景 3 拿骨架再改写。
 
