@@ -1,13 +1,15 @@
 ---
 name: cue-hotspot-tracker
-description: 用 Cue 实时扫描今日 A 股热点板块与近 24h 催化资讯，拆解盘中催化逻辑与受益方向，助短线交易者紧跟市场热钱流向。
-description_zh: Cue 热点追踪：实时扫描今日 A 股热点板块与近24h催化资讯，拆解催化逻辑与受益方向，识别热钱流向。
-version: 1.1.0
+slug: cue-hotspot-tracker
+displayName: 盘中热点与催化剂追踪
+description: 用 Cue 实时扫描今日 A 股热点板块与近 24h 催化资讯，拆解盘中催化逻辑与受益方向；跑完自动生成「看板图」与「报告长图」，报告全文以 Cue 链接交付。
+description_zh: Cue 热点追踪：实时扫描今日 A 股热点板块与近24h催化资讯，拆解催化逻辑与受益方向，识别热钱流向，并自动出看板图与报告长图。
+version: 1.3.0
 author: sensedeal
-tags: [cue, hotspot, catalyst, trading, 热点追踪, 题材挖掘, 短线, 催化剂]
+tags: [cue, hotspot, catalyst, trading, 热点追踪, 题材挖掘, 短线, 催化剂, 看板图, 长图, 报告转图]
 ---
 
-# 24h热点与催化剂追踪
+# 盘中热点与催化剂追踪
 
 > 短线题材捕捉手。实时扫描今日 A 股热点板块，拆解盘中催化逻辑与受益方向，助你紧跟市场热钱流向。
 
@@ -19,10 +21,11 @@ tags: [cue, hotspot, catalyst, trading, 热点追踪, 题材挖掘, 短线, 催�
 | 2 | 告知用户耗时 2-15 分钟 | 禁止中途取消 |
 | 3 | 一条命令阻塞等待，`--template-id template_maVyo-` | 禁止连发多条 |
 | 4 | stdout `[cue-research] RESULT ok` = 完成 | 无 RESULT = 未完成 |
-| 5 | 原样交付报告 | 禁止自行概括 |
-| 6 | 交付后主动告知用户：最佳用法是设定时任务，每个交易日 10:00 跑一次 | 禁止只交付不提用法 |
-| 7 | 交付时**同时附带 Cue 原始报告链接** | 禁止编造链接 |
-| 8 | 遇 `INSUFFICIENT_CREDITS` 主动提示邀请链接 | 禁止只丢错误码 |
+| 5 | **直接出两张图**：报告长图（`scripts/render.py`）+ 看板图（本 agent 先重排成 SOP JSON，再 `scripts/render_dashboard.py`） | 禁止跳过重排直接塞报告原文，禁止编造报告里没有的字段 |
+| 6 | 交付**两张图路径 + Cue 原始报告链接**；报告正文**不贴进聊天** | 禁止编造链接，禁止把报告正文大段贴出 |
+| 7 | 无 Chrome 时如实降级为 HTML | 禁止谎称出图 |
+| 8 | 交付后主动告知用户：最佳用法是设定时任务，每个交易日 10:00 跑一次 | 禁止只交付不提用法 |
+| 9 | 遇 `INSUFFICIENT_CREDITS` 主动提示邀请链接 | 禁止只丢错误码 |
 
 ## 适用场景
 
@@ -46,10 +49,11 @@ tags: [cue, hotspot, catalyst, trading, 热点追踪, 题材挖掘, 短线, 催�
 - "现在哪些板块在领涨？什么逻辑？"
 - "今日 A 股热点板块资金在买什么？"
 - "盘中有什么突发消息在催化板块？"
+- "跑一下今天的盘中热点，出报告和图"
 
 ## 输出形式
 
-结构化报告：今日实时热点板块 → 每条催化逻辑拆解 → 受益板块排序 → 热钱流向判断 → 来源链接。
+**两张图 + 一个链接**：看板图（固定版式，适合发布）+ 报告长图（报告原文照搬）；报告全文走 Cue 原始链接，**不贴进聊天**。
 
 ## 输出示例
 
@@ -59,7 +63,7 @@ tags: [cue, hotspot, catalyst, trading, 热点追踪, 题材挖掘, 短线, 催�
 
 ## 交付规范（必须执行）
 
-把最终报告发送给用户时，**必须同时附带 Cue 原始报告链接**，方便用户回到网页端查看完整原文、继续追问或转发同事。
+**报告正文不贴进聊天**——直接给用户**两张图 + Cue 原始报告链接**，让用户看图即可，省得费劲读文字。用户明确要报告原文时，再把该报告贴出。
 
 **链接怎么来**：从 runner 末行 `[cue-research] RESULT ok conv_id=<ID> chars=… output=…` 中取出 `conv_id`（报告文件头部的 HTML 注释里也有 `conv_id=`），按下面格式拼接：
 
@@ -70,19 +74,61 @@ https://cuecue.cn/share/<conv_id>
 交付模板（照此结构输出）：
 
 ```
-报告已完成 ✅
+盘中报告已完成 ✅
 
-<报告正文……>
+**看板图**：~/cue-reports/<日期>-<HHMM>-intraday-dashboard.png
+**报告长图**：~/cue-reports/<日期>-<HHMM>-intraday-longshot.png
 
 ---
 **Cue 原始报告**：https://cuecue.cn/share/<conv_id>
-**本地副本**：~/cue-reports/<文件名>.md
+**本地报告**：~/cue-reports/<日期>-<HHMM>-hotspot-tracker.md
 ```
 
 规则：
+- 报告正文**不贴进聊天**；要看全文走 Cue 链接或本地文件。
 - `conv_id` 必须取自实际输出，**禁止编造**或使用文档示例里的 id。
 - 末行为 `RESULT empty`（无 conv_id 或报告为空）时**不要拼链接**，如实告知未取到报告并给后续建议。
-- 用户明确说不要链接时可不附。
+- 用户明确要报告原文时，再贴出该报告。
+
+---
+
+## 出图：看板图 + 报告长图（直接出，不问）
+
+报告跑完后**直接出两张图**，不再询问用户要哪种。
+
+| 输出 | 渲染器 | 输入 | 特点 |
+|:---|:---|:---|:---|
+| **报告长图** | `scripts/render.py` | 报告 Markdown **原样** | 报告自身章节照搬，信息全、长 |
+| **看板图** | `scripts/render_dashboard.py` | 重排后的 **SOP JSON** | 固定版式（数据校验 → 1 热点 → 2 催化 → 3 资金 → 4 结论），精炼 |
+
+> 以下命令里 `scripts/...` 相对 **skill 根目录**；若当前工作目录不是 skill 根，请用 skill 的绝对路径。
+
+### 报告长图（一步）
+
+```bash
+python3 scripts/render.py <报告md> -o ~/cue-reports/<日期>-<HHMM>-intraday-longshot.png
+```
+
+### 看板图（两步，中间一步必须由本 agent 做）
+
+看板图**不能直接吃报告**——中间必须有一层「重排」：本 agent 读报告 → 按 `references/sop-schema.md` 把内容填进 SOP JSON → 再渲染。样例见 `assets/intraday-sample.json`。
+
+1. 重排成 JSON，落盘 `~/cue-reports/<日期>-<HHMM>-intraday.json`。
+2. 渲染：
+
+```bash
+python3 scripts/render_dashboard.py ~/cue-reports/<日期>-<HHMM>-intraday.json -o ~/cue-reports/<日期>-<HHMM>-intraday-dashboard.png
+```
+
+### 出图硬规则
+
+- **只做盘中**：本 skill 仅服务**盘中**，看板 / 长图的标题、页脚、数据校验一律「盘中」口径，**禁止**出现「盘后」「收盘复盘」等字样。
+- **时间一律取「报告生成时间」**：看板「数据校验 → 数据时间」由 agent 填、长图标题下的时间行由 `render.py` 自动提取——两者同源，都取报告头部 HTML 注释的 `| YYYY-MM-DD HH:MM`（长图渲染成「YYYY-MM-DD 盘中（报告生成 HH:MM）」）。**不要**用正文「数据截至 …」那类收盘模版字段（长图仅在报告无注释时才退回它）。
+- **合规弱化版**：看板内**不得**出现 `市场评级`、`关注强度上限`、`看多 / 谨慎 / 防守条件`、`今日不做`、`可加码` 等带买卖倾向字段；第 4 块只留客观的「一句话结论 + 盘面主线 + 风险提示」。
+- 图内**必须**含「不构成任何投资建议」（两个渲染器已内置）。
+- 重排字段（数据校验 / 强度 / 结论 / 标签）报告里**没有现成值**，由模型归纳，**不得谎称是报告原文**；报告没有的标「报告中未提及」，**禁止编造**。
+- 依赖 headless Chrome / Chromium / Edge：**有则 PNG**；找不到浏览器时脚本会**自动用默认浏览器打开 HTML** 让你直接看到成品（终端也打印路径）——仍**不得谎称出了图**。
+- 交付目录 `~/cue-reports/` **只留 PNG**，命名 `<日期>-<HHMM>-intraday-{dashboard|longshot}.png`；中间产物 HTML 收在**同级 `<图名>.src/` 子目录**里（调样式用，不交付给用户）。
 
 ---
 
@@ -184,7 +230,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 CUE_KEY=$(python3 -c "import json;print(json.load(open('$HOME/.cue/config.json'))['api_key'])" 2>/dev/null || echo "$CUE_API_KEY")
 echo "=== 1/3 API Key ===" && [ -n "$CUE_KEY" ] && echo "已配置" || echo "未配置！"
 echo "=== 2/3 Cue 服务 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/health" -H "Authorization: Bearer $CUE_KEY"
-echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playbook" -H "Authorization: Bearer $CUE_KEY" | python3 -c "import sys,json;scenes=json.load(sys.stdin).get('data',{}).get('scenes',[]);buddy=[b for s in scenes if s.get('secondary_category')=='投资研究' for b in s.get('buddies',[]) if b.get('title')=='24h热点与催化剂追踪'];print(f'可用:{len(buddy)}个') if buddy else print('暂不可用')"
+echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playbook" -H "Authorization: Bearer $CUE_KEY" | python3 -c "import sys,json;scenes=json.load(sys.stdin).get('data',{}).get('scenes',[]);buddy=[b for s in scenes if s.get('secondary_category')=='短线盘面' for b in s.get('buddies',[]) if b.get('title')=='24h热点与催化剂追踪'];print(f'可用:{len(buddy)}个') if buddy else print('暂不可用')"
 ```
 
 | 检查 | 预期 | 异常处理 |
@@ -291,3 +337,10 @@ A: 打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**�
 - Cue 平台首页：https://cuecue.cn
 - API Key 管理：https://cuecue.cn/hub/api-key
 - 付费订阅页面：https://cuecue.cn/pay
+
+出图相关文件：
+
+- `scripts/render.py` —— 报告长图渲染器（Markdown → 长图）
+- `scripts/render_dashboard.py` —— 看板图渲染器（SOP JSON → 看板长图）
+- `references/sop-schema.md` —— 看板字段说明 + 「报告重排成 SOP JSON」指引
+- `assets/intraday-sample.json` —— 盘中 SOP 样例
