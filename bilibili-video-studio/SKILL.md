@@ -43,7 +43,7 @@ tags: [bilibili, video, 爆款拆解, 脚本生成, 视频转文字, 提示词�
 
 ## 前置依赖（新用户首次使用只需做这一件事）
 
-- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。获取：[cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key)（新账号送 500 积分 + 每天 10 免费积分）。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。详见「积分不足专项提示」。推荐用环境变量 `CUE_API_KEY` 传入（避免明文落盘），或写入本地 `~/.cue/config.json`：
+- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。获取：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-bilibili-video-studio)（新账号送 500 积分 + 每天 10 免费积分）。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。详见「积分不足专项提示」。推荐用环境变量 `CUE_API_KEY` 传入（避免明文落盘），或写入本地 `~/.cue/config.json`：
 
   ```bash
   # 方式一（推荐）：环境变量
@@ -60,13 +60,13 @@ tags: [bilibili, video, 爆款拆解, 脚本生成, 视频转文字, 提示词�
 > 检测到未配置或失效时，**必须主动把下面三步说全**（照这个话术说，别只丢一句"请提供 API Key"）：
 >
 > > 这个技能要一把 Cue API Key 才能跑，三步就好：
-> > 1. 打开 **[cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key)**，登录后创建一把 Key（新账号送 500 积分 + 每天 10 免费积分）
+> > 1. 打开 **[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-bilibili-video-studio)**，登录后创建一把 Key（新账号送 500 积分 + 每天 10 免费积分）
 > > 2. 把 Key **完整复制**下来
 > > 3. **直接粘贴发给我**，我帮你写进配置，然后马上就能跑
 >
 > 用户发来 Key 后，Agent 负责写入 `~/.cue/config.json`（格式 `{"api_key": "sk..."}`），写完即可重跑，无需重启客户端。
 >
-> **Key 纪律**：只在用户本机写入，**禁止回显到对话、日志或任何文件示例中**；用户若把 Key 贴在了对话里，提醒他可以去 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 轮换一把。
+> **Key 纪律**：只在用户本机写入，**禁止回显到对话、日志或任何文件示例中**；用户若把 Key 贴在了对话里，提醒他可以去 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-bilibili-video-studio) 轮换一把。
 
 ### 健康检查（跑解析前先验证三件事）
 
@@ -86,7 +86,7 @@ echo "=== 3/3 curl ===" && { command -v curl >/dev/null && echo "就绪" || echo
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后**复制发给你**（Agent 无法代生成，也无权查看）；话术见上方引用块 |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-bilibili-video-studio) 生成后**复制发给你**（Agent 无法代生成，也无权查看）；话术见上方引用块 |
 | 远程端点 | `已连接（3 工具）` | 等 5 分钟重试；仍不通查网络/DNS，或走「降级方案」；报 `Authentication required` = Key 没带上或已失效 |
 | curl | `就绪` | 系统一般自带；缺失时用 `python3` + `urllib` 带浏览器 UA 做等价重定向跟随（见步骤 0） |
 
@@ -544,5 +544,5 @@ curl -sS --compressed "https://api.bilibili.com/x/player/playurl?bvid=BVxxxxxxxx
 
 - 解析底座：cue-omni-reader 技能（远程端点调用规范、错误码总表）
 - 在线体验：https://cuecue.cn/hub/omni-reader
-- API Key 管理：https://cuecue.cn/hub/api-key
+- API Key 管理：https://cuecue.cn/api-key?src=github-bilibili-video-studio
 - 订阅付费页面：https://cuecue.cn/pay

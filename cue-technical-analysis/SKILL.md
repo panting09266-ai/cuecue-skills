@@ -2,7 +2,7 @@
 name: cue-technical-analysis
 description: 用 Cue 对个股做短线走势与技术面分析——从量价关系、资金流向、趋势结构入手，计算波动率与最大回撤，产出可复核的走势分析底稿，辅助判断短线的买卖节奏和关键价位。
 description_zh: Cue 短线走势与技术面分析：穿透量价关系/资金流向/趋势结构/支撑压力位，产出可复核的走势底稿。
-version: 1.1.0
+version: 1.2.0
 author: sensedeal
 tags: [cue, technical-analysis, short-term-trading, quantity-price, 短线分析, 技术分析, 量价分析, 资金流向, 支撑压力位]
 ---
@@ -22,6 +22,7 @@ tags: [cue, technical-analysis, short-term-trading, quantity-price, 短线分析
 | 5 | 原样交付，来源链接不丢失 | 禁止概括/改数字 |
 | 6 | 交付时**同时附带 Cue 原始报告链接** | 禁止编造链接 |
 | 7 | 遇 `INSUFFICIENT_CREDITS` 主动提示邀请链接 | 禁止只丢错误码 |
+| 8 | 交付后**用选项弹框**问是否设置定时：每个交易日 16:30（推荐，落在 16:00–17:00 收盘后窗口）/ 自定义时间 / 暂不设置 | 禁止只发文字提醒；禁止未经用户选择擅自开启；禁止错绑标的 |
 
 ## 适用场景
 
@@ -86,6 +87,65 @@ https://cuecue.cn/share/<conv_id>
 
 ---
 
+## 定时任务（交付后必做：弹框询问）
+
+技术面分析是**个股**维度，适合每个交易日收盘后固定跑一次，次日开盘前直接看结论。**交付报告后，不要只发一句"建议定时跑"的文字提醒，必须直接弹出选项让用户点选。**
+
+### 弹框内容（必须三选一）
+
+优先用运行环境自带的选项弹框能力（如 Claude Code 的 `AskUserQuestion`）。环境不支持弹框时，把同样的三个选项以编号形式写在正文末尾，等用户回复编号。
+
+> **要不要把这只股票的短线分析设成定时任务，每个交易日收盘后自动生成？**
+>
+> 1. **每个交易日 16:30（推荐）** — 15:00 收盘后日线、量价与资金数据已落地，处于 16:00–17:00 推荐窗口，晚上就能看
+> 2. **自定义时间** — 自己指定几点、每周哪几天（建议仍落在 16:00–17:00）
+> 3. **暂不设置** — 这次先看报告，以后需要随时说
+
+选「自定义时间」时，必须追问**几点跑、每周哪几天**；并提醒用户：**早于 16:00 跑，当天日线与资金数据可能还没补齐**，建议仍在 16:00–17:00 之间。
+
+### 定时的是哪只股票（必须确认）
+
+本 skill 一次只分析一只股票，定时任务必须绑定明确标的：
+
+- 默认按**本次刚分析的股票**建任务；
+- 用户要定时看多只时，逐只确认标的，每只单独一条任务；**每只每次运行都消耗一份 Cue 积分**，建任务前先把标的总数和预计积分说清楚。
+
+### 铁律
+
+- **禁止擅自开启**：用户没有明确选择时间之前，不得创建任何定时任务、cron、launchd。
+- **禁止只发文字**：文字提醒不算完成，必须给出可点选的选项。
+- **禁止错绑标的**：用户没确认标的时不得建任务，禁止拿示例股票或上一只股票顶替。
+- **每次交付问一次**：用户配置成功或明确选「暂不设置」后，后续交付不再重复打扰。
+- **禁止谎称已设**：当前客户端不支持定时任务时，给出时点清单让用户自行设提醒，并说明未配置。
+
+### 用户选定后怎么配
+
+统一用同一套命令跑（把 `<目标股票>` 换成用户确认的标的）：
+
+```bash
+python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
+  --query "<目标股票> 短线量价与技术面分析：量价关系 + 资金流向 + 趋势结构 + 支撑压力位" \
+  --template-id template_L1YwFU \
+  --output ~/cue-reports/$(date +%Y-%m-%d-%H%M)-technical-analysis.md
+```
+
+按运行环境选一种落地方式：
+
+| 环境 | 配置方式 |
+|------|---------|
+| Claude Code | 用 `CronCreate`，cron 表达式 `30 16 * * 1-5`（自定义时间按用户所选取 分 时 日 月 周） |
+| macOS | 建 `~/Library/LaunchAgents/com.cue.technical-analysis.plist`，`StartCalendarInterval` 设 `Weekday` 1–5、`Hour` 16、`Minute` 30，再 `launchctl load` |
+| Linux | `crontab -e` 追加 `30 16 * * 1-5 <上面的命令>` |
+
+配完必须回报三件事：**触发时间、绑定标的、如何关掉**（Claude Code 删任务 / `launchctl unload` / `crontab -e` 删除对应行）。
+
+### 必须提前告知的两个坑
+
+- **每次运行都会消耗 Cue 积分**，盯多只股票按任务数叠加，余额不足时当天会失败并提示充值，不会自动跳过。
+- **定时任务不会自动推送**：报告只落盘 `~/cue-reports/*.md`，需要自己打开看；看板可在次日交互时基于已落盘的 `.md` 补生成（纯本地操作，不消耗积分）。
+
+---
+
 ## 环境要求
 
 **首次使用运行 skill 自带的一键安装脚本**（检查依赖 → 克隆 runner → 验证 Key → 测试连通性）：
@@ -95,7 +155,7 @@ https://cuecue.cn/share/<conv_id>
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/hub/api-key) 注册获取。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-technical-analysis) 注册获取。
 
 - **积分赠送**：新注用户赠送 500 积分，邀请新用户再送 500 积分。
 - **积分不足**：积分用完后，前往 [cuecue.cn/pay](https://cuecue.cn/pay) 页面进行订阅。
@@ -163,7 +223,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-technical-analysis) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源 | 公开网站 | Cue 用缓存兜底，标注"来源暂不可达" |
 
@@ -182,7 +242,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-technical-analysis) 生成后发给你（Agent 无法代生成，也无权查看） |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 
@@ -284,5 +344,5 @@ A: 打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**�
 ## 参考
 
 - Cue 平台首页：https://cuecue.cn
-- API Key 管理：https://cuecue.cn/hub/api-key
+- API Key 管理：https://cuecue.cn/api-key?src=github-technical-analysis
 - 付费订阅页面：https://cuecue.cn/pay

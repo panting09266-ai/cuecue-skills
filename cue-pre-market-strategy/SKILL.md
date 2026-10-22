@@ -4,7 +4,7 @@ name: cue-pre-market-strategy
 Name: 今日盘前机会
 description: 每天开盘前 3 分钟，看懂今天 A 股的机会与风险——自动扫隔夜美股、政策、产业新闻，大白话讲清利好利空，排出今日最值得关注的方向清单。
 description_zh: Cue 今日盘前机会：每天开盘前 3 分钟，扫隔夜大事，看懂今天 A 股机会与风险。
-version: 1.1.0
+version: 1.2.0
 author: sensedeal
 tags: [cue, pre-market, trading-strategy, 今日盘前机会, 盘前机会, 盘前热点, 盘前掘金, 开盘前必看]
 ---
@@ -24,6 +24,7 @@ tags: [cue, pre-market, trading-strategy, 今日盘前机会, 盘前机会, 盘�
 | 5 | 原样交付报告 | 禁止概括 |
 | 6 | 交付时**同时附带 Cue 原始报告链接** | 禁止编造链接 |
 | 7 | 遇 `INSUFFICIENT_CREDITS` 主动提示邀请链接 | 禁止只丢错误码 |
+| 8 | 交付后**用选项弹框**问是否设置定时任务 | 禁止只发文字提醒 / 禁止擅自开启 |
 
 ## 适用场景
 
@@ -85,6 +86,7 @@ https://cuecue.cn/share/<conv_id>
 - `conv_id` 必须取自实际输出，**禁止编造**或使用文档示例里的 id。
 - 末行为 `RESULT empty`（无 conv_id 或报告为空）时**不要拼链接**，如实告知未取到报告并给后续建议。
 - 用户明确说不要链接时可不附。
+- 报告交付完**必须紧接着弹出定时任务选项**（见「定时任务（交付后必做）」一节），但**只有用户明确选择时间后才配置**。
 
 ---
 
@@ -103,7 +105,7 @@ fi
 #   国内网络慢可换 Gitee 镜像：
 #   git clone https://gitee.com/sensedeal/cue-skills ~/.cue/cue-skills
 
-# 2. 写入 API Key（在 https://cuecue.cn/hub/api-key 创建后复制）
+# 2. 写入 API Key（在 https://cuecue.cn/api-key?src=github-pre-market-strategy 创建后复制）
 mkdir -p ~/.cue && echo '{"api_key":"sk..."}' > ~/.cue/config.json
 
 # 3. 验证连通（返回 200 即成功）
@@ -115,7 +117,7 @@ curl -sS --max-time 10 "https://cuecue.cn/api/templates" \
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/hub/api-key) 注册获取。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-pre-market-strategy) 注册获取。新账号送 500 积分，每天再免费送 10 分。
 
 - **积分赠送**：新注用户赠送 500 积分，邀请新用户再送 500 积分。
 - **积分不足**：积分用完后，前往 [cuecue.cn/pay](https://cuecue.cn/pay) 页面进行订阅。
@@ -164,13 +166,64 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 ---
 
+## 定时任务（交付后必做）
+
+盘前报告的价值在「每天开盘前都有」。**交付报告后，不要只发一句"建议你定时跑"的文字提醒，必须直接弹出选项让用户点选。**
+
+### 弹框内容（必须三选一）
+
+优先用运行环境自带的选项弹框能力（如 Claude Code 的 `AskUserQuestion`）。环境不支持弹框时，把同样的三个选项以编号形式写在正文末尾，等用户回复编号。
+
+> **要不要把这份盘前机会设成定时任务，每个交易日早上自动生成？**
+>
+> 1. **每个交易日 08:00（推荐）** — 周一至周五每天 08:00 自动跑，开盘前拿到今日机会清单
+> 2. **自定义时间** — 自己指定几点、哪几天
+> 3. **暂不设置** — 这次先只看报告，以后需要随时说
+
+选择 `2` 时再追问一句：**几点跑？周一到周五，还是也要周末？**（默认周一到周五；建议 07:30–08:30，隔夜信息已沉淀且距开盘还有决策时间）。用户回答后再确认一次具体时间，例如「每周一至周五 08:00，确认吗？」
+
+### 铁律
+
+- **禁止擅自开启**：用户没选时间之前，不得创建任何定时任务、cron、launchd。
+- **禁止只发文字**：文字提醒不算完成，必须给出可点选的选项。
+- **禁止重复打扰**：用户本次已选过（配置成功或明确选"暂不设置"）就不要再问。
+- **每次只问一次**：交付后问一次即可，不要追问"真的不要吗"。
+
+### 用户选定后怎么配
+
+统一用同一套命令跑（与手工调用完全一致）：
+
+```bash
+python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
+  --query "今日盘前策略：隔夜全球事件→A股映射→产业链传导→爆发力主题" \
+  --template-id template_qsweF9 \
+  --output ~/cue-reports/$(date +%Y-%m-%d-%H%M)-pre-market.md
+```
+
+按运行环境选一种落地方式：
+
+| 环境 | 配置方式 |
+|------|---------|
+| Claude Code | 用 `CronCreate`，cron 表达式 `0 8 * * 1-5`（自定义时间按用户所选取 分 时 日 月 周） |
+| macOS | 建 `~/Library/LaunchAgents/com.cue.pre-market.plist`，`StartCalendarInterval` 设 `Weekday` 1–5、`Hour` 8、`Minute` 0，再 `launchctl load` |
+| Linux | `crontab -e` 追加 `0 8 * * 1-5 <上面的命令>` |
+
+配完必须回报三件事：**触发时间、输出目录、如何关掉**（Claude Code 删任务 / `launchctl unload` / `crontab -e` 删除对应行）。
+
+### 必须提前告知的两个坑
+
+- **每次运行都会消耗 Cue 积分**，余额不足时当天会失败并提示充值，不会自动跳过。
+- **不会自动推送**：报告只落在 `~/cue-reports/`，需要自己打开看；想要消息推送要另外接通知渠道。
+
+---
+
 ## 架构说明
 
 本 Skill **不在本地执行检索**。流程是 Agent → Cue API（cuecue.cn）→ 外部数据源。解析结果的质量和时效取决于 Cue 服务端和外部数据源的状态。
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-pre-market-strategy) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源 | 公开网站 | Cue 用缓存兜底，标注"来源暂不可达" |
 
@@ -195,7 +248,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-pre-market-strategy) 生成后发给你（Agent 无法代生成，也无权查看） |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 
@@ -307,7 +360,7 @@ Cue 长时间不可达时的手动替代渠道：
 A: 早盘简报是理财师发给客户的素材；热点追踪讲「发生了什么」；今日盘前机会更进一步，讲「对 A 股意味着什么、今天该关注哪些板块」，并给出机会排序。深度依次递增，这个最接近「今天该怎么看盘」。
 
 **Q: 最佳跑的时间？**
-A: 建议 8:00-8:30 跑，隔夜信息已充分沉淀，距开盘（9:30）还有充足决策时间。上班族通勤路上就能跑完。
+A: 建议 8:00-8:30 跑，隔夜信息已充分沉淀，距开盘（9:30）还有充足决策时间。上班族通勤路上就能跑完。交付报告后 Agent 会直接问你要不要设成定时任务，选「每个交易日 08:00」即可每天自动生成。
 
 **Q: 报告能在网页端看原文吗？**
 A: 可以。交付时会同时附上 Cue 原始报告链接 `https://cuecue.cn/share/<conv_id>`，点开即可回到网页端查看完整原文、继续追问或转发同事。

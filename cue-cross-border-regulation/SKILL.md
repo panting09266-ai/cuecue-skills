@@ -45,7 +45,7 @@ metadata:
 
 ## 快速开始（仅需 1 步）
 
-🔑 **获取调用密钥**：前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 免费注册获取 API key（新账号送 500 积分，每天再送 10 积分）。
+🔑 **获取调用密钥**：前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-cross-border-regulation) 免费注册获取 API key（新账号送 500 积分，每天再送 10 积分）。
 
 *(拿到 Key 后直接发给本 AI 助手，它会自动完成网络探测、海外数据库检索及报告生成，您只需安心等待。)*
 
@@ -174,4 +174,4 @@ A: 结论带来源链接可回查。注意：覆盖以美国/欧盟/新加坡等
 
 - Cue 平台：https://cuecue.cn
 - Playbook 页面：https://cuecue.cn/playbook
-- API Key 管理：https://cuecue.cn/hub/api-key
+- API Key 管理：https://cuecue.cn/api-key?src=github-cross-border-regulation

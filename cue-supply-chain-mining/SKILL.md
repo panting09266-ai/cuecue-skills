@@ -197,7 +197,7 @@ fi
 
 依赖：`git` + `python3` + `curl`（macOS 自带，Linux `apt install git python3 curl`）。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/hub/api-key) 注册获取。新用户注册一次性送 500 积分，之后每天再免费送 10 积分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-supply-chain-mining) 注册获取。新用户注册一次性送 500 积分，之后每天再免费送 10 积分。
 
 积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。详见下方「积分不足专项提示」。
 
@@ -251,7 +251,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-supply-chain-mining) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源 | 公开网站 | Cue 用缓存兜底，标注"来源暂不可达" |
 
@@ -270,7 +270,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-supply-chain-mining) 生成后发给你（Agent 无法代生成，也无权查看） |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 
@@ -416,6 +416,6 @@ A: 两个办法。**推荐邀请好友**：打开 [https://cuecue.cn/](https://c
 ## 参考
 
 - Cue 平台首页：https://cuecue.cn
-- API Key 管理：https://cuecue.cn/hub/api-key
+- API Key 管理：https://cuecue.cn/api-key?src=github-supply-chain-mining
 - 付费订阅页面：https://cuecue.cn/pay
 

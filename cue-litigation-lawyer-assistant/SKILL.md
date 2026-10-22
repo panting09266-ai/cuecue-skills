@@ -91,7 +91,7 @@ metadata:
 
 ## 使用前配置（全自动装配）
 
-🔑 **获取调用密钥**：在 [cuecue.cn](https://cuecue.cn/hub/api-key) 免费注册获取 API key（新注用户赠送 500 积分）。
+🔑 **获取调用密钥**：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-litigation-lawyer-assistant) 免费注册获取 API key（新注用户赠送 500 积分）。
 
 *(获取密钥后，直接将其发送给当前的 AI 助手，并对它说：“**这是我的 key，请帮我配好环境。**” 助手会自动为你拉取底层脚本、写入配置文件，并挂载秒级查法条的 MCP 工具！)*
 
@@ -153,7 +153,7 @@ metadata:
 
 ### Q1 怎么开始使用？密钥从哪来？
 
-1. 前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 免费注册，领取 API key（**新注赠送 500 积分**）。
+1. 前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-litigation-lawyer-assistant) 免费注册，领取 API key（**新注赠送 500 积分**）。
 2. 把 key 直接发给当前 AI 助手，说一句：**“这是我的 key，请帮我配好环境。”**
 3. 助手会自动写入配置、拉取底层脚本、挂载秒级查法条工具。配置完成后**重启 AI 客户端**即可生效。
 
@@ -407,5 +407,5 @@ https://cuecue.cn/share/<conv_id>
 ## 参考
 
 - Cue 平台首页：https://cuecue.cn
-- API Key 管理：https://cuecue.cn/hub/api-key
+- API Key 管理：https://cuecue.cn/api-key?src=github-litigation-lawyer-assistant
 - 付费订阅页面：https://cuecue.cn/pay

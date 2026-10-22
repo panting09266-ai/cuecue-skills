@@ -80,7 +80,7 @@ metadata:
 
 ## 使用前配置（全自动装配）
 
-🔑 **获取调用密钥**：在 [cuecue.cn](https://cuecue.cn/hub/api-key) 免费注册获取 API key（新注用户赠送 500 积分）。
+🔑 **获取调用密钥**：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-contract-risk-review) 免费注册获取 API key（新注用户赠送 500 积分）。
 
 *(获取密钥后，直接将其发送给当前的 AI 助手，并对它说：“**这是我的 key，请帮我配好环境。**” 助手会自动为你拉取底层脚本、写入配置文件。)*
 

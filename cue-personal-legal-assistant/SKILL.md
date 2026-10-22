@@ -120,7 +120,7 @@ metadata:
 
 ## 使用前（只需 1 步）
 
-🔑 **获取密钥**：在 [cuecue.cn](https://cuecue.cn/hub/api-key) 免费注册，获取 API key（现在注册送 500 积分）。
+🔑 **获取密钥**：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-personal-legal-assistant) 免费注册，获取 API key（现在注册送 500 积分）。
 
 *(拿到 key 后直接发给助手即可，剩下的环境依赖和配置统统由 AI 助手全自动为你完成！)*
 
@@ -299,5 +299,5 @@ A: 打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**�
 ## 参考
 
 - Cue 平台首页：https://cuecue.cn
-- API Key 管理：https://cuecue.cn/hub/api-key
+- API Key 管理：https://cuecue.cn/api-key?src=github-personal-legal-assistant
 - 付费订阅页面：https://cuecue.cn/pay

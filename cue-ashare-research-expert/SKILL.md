@@ -162,7 +162,7 @@ else
     || git clone https://gitee.com/sensedeal/cue-skills ~/.cue/cue-skills
 fi
 
-# 2. 写入 API Key（在 https://cuecue.cn/hub/api-key 创建后复制）
+# 2. 写入 API Key（在 https://cuecue.cn/api-key?src=github-ashare-research-expert 创建后复制）
 mkdir -p ~/.cue && echo '{"api_key":"sk..."}' > ~/.cue/config.json
 
 # 3. 验证连通（返回 200 即成功）
@@ -174,7 +174,7 @@ curl -sS --max-time 10 "https://cuecue.cn/api/templates" \
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/hub/api-key) 注册获取。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-ashare-research-expert) 注册获取。新账号送 500 积分，每天再免费送 10 分。
 
 - **积分赠送**：新注用户赠送 500 积分，邀请新用户再送 500 积分。
 - **积分不足**：积分用完后，前往 [cuecue.cn/pay](https://cuecue.cn/pay) 页面进行订阅。
@@ -251,7 +251,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后写入 ~/.cue/config.json |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-ashare-research-expert) 生成后写入 ~/.cue/config.json |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源 | 公开网站 | Cue 用缓存兜底，标注"来源暂不可达" |
 
@@ -284,7 +284,7 @@ print(f'可用:{len(ok)}/11' + ('' if ok==want else f\"  缺失/已变更:{sorte
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后发给你 |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-ashare-research-expert) 生成后发给你 |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:11/11` | 少于 11 个 → 按「搭子不在 live 里时」重新查 id；缺失的搭子跳过不派 |
 

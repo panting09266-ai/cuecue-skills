@@ -41,7 +41,7 @@ metadata:
 
 ## 快速开始（仅需 1 步）
 
-🔑 **获取调用密钥**：前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 免费注册获取 API key（新账号送 500 积分，每天再送 10 积分，单次起草约耗 3-8 积分）。
+🔑 **获取调用密钥**：前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-litigation-drafting) 免费注册获取 API key（新账号送 500 积分，每天再送 10 积分，单次起草约耗 3-8 积分）。
 
 *(拿到 Key 后直接发给本 AI 助手，它会自动完成后续的环境配置、接口调用甚至 Word 格式转换，你只需安心等待初稿即可。)*
 
@@ -71,7 +71,7 @@ metadata:
 本节供 Agent 阅读。用户仅需提供 API key，所有的环境准备、健康检查、调用执行和格式转换均由你（Agent）在后台静默完成。
 
 **一、 运行前置检查（必须静默执行）：**
-1. **API Key 校验**：检查 `~/.cue/config.json`，若无有效 key，提示用户前往 https://cuecue.cn/hub/api-key 获取并协助写入。
+1. **API Key 校验**：检查 `~/.cue/config.json`，若无有效 key，提示用户前往 https://cuecue.cn/api-key?src=github-litigation-drafting 获取并协助写入。
 2. **环境准备**：确认 `~/.cue/cue-skills/cue-research/scripts/research_run.py` 是否存在。若无，执行克隆：
    `if [ -d ~/.cue/cue-skills/.git ]; then git -C ~/.cue/cue-skills pull --ff-only; else git clone https://github.com/sensedeal/cue-skills ~/.cue/cue-skills || git clone https://gitee.com/sensedeal/cue-skills ~/.cue/cue-skills; fi`
    *(如 GitHub 不通，走镜像 `https://gitee.com/sensedeal/cue-skills`)*
@@ -210,4 +210,4 @@ A: 质量取决于输入的案件事实和材料的完整度。输入越详细�
 
 - Cue 平台：https://cuecue.cn
 - Playbook 页面：https://cuecue.cn/playbook
-- API Key 管理：https://cuecue.cn/hub/api-key
+- API Key 管理：https://cuecue.cn/api-key?src=github-litigation-drafting

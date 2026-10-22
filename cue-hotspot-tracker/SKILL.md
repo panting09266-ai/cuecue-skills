@@ -4,7 +4,7 @@ slug: cue-hotspot-tracker
 displayName: 盘中热点与催化剂追踪
 description: 用 Cue 实时扫描今日 A 股热点板块与近 24h 催化资讯，拆解盘中催化逻辑与受益方向；跑完自动生成「看板图」与「报告长图」，报告全文以 Cue 链接交付。
 description_zh: Cue 热点追踪：实时扫描今日 A 股热点板块与近24h催化资讯，拆解催化逻辑与受益方向，识别热钱流向，并自动出看板图与报告长图。
-version: 1.3.0
+version: 1.4.0
 author: sensedeal
 tags: [cue, hotspot, catalyst, trading, 热点追踪, 题材挖掘, 短线, 催化剂, 看板图, 长图, 报告转图]
 ---
@@ -24,7 +24,7 @@ tags: [cue, hotspot, catalyst, trading, 热点追踪, 题材挖掘, 短线, 催�
 | 5 | **直接出两张图**：报告长图（`scripts/render.py`）+ 看板图（本 agent 先重排成 SOP JSON，再 `scripts/render_dashboard.py`） | 禁止跳过重排直接塞报告原文，禁止编造报告里没有的字段 |
 | 6 | 交付**两张图路径 + Cue 原始报告链接**；报告正文**不贴进聊天** | 禁止编造链接，禁止把报告正文大段贴出 |
 | 7 | 无 Chrome 时如实降级为 HTML | 禁止谎称出图 |
-| 8 | 交付后主动告知用户：最佳用法是设定时任务，每个交易日 10:00 跑一次 | 禁止只交付不提用法 |
+| 8 | 交付后**用选项弹框**问是否设置定时：每个交易日 10:00（推荐，开盘 30 分钟后）/ 自定义时间 / 暂不设置 | 禁止只发文字提醒；禁止未经用户选择擅自开启 |
 | 9 | 遇 `INSUFFICIENT_CREDITS` 主动提示邀请链接 | 禁止只丢错误码 |
 
 ## 适用场景
@@ -132,11 +132,60 @@ python3 scripts/render_dashboard.py ~/cue-reports/<日期>-<HHMM>-intraday.json 
 
 ---
 
-## 最佳用法（强烈建议定时跑）
+## 最佳用法（交付后必做：弹框询问定时任务）
 
 本 skill 的核心价值在**盘中实时**——9:30 开盘后热点板块才逐步成形，手动跑容易错过早盘强势题材。最佳用法是**设置定时任务，每个交易日 10:00 自动跑一次**（开盘 30 分钟后，早盘热点已初步明朗）。
 
-Agent 在交付报告后，应**主动向用户建议**这一用法，并询问是否需要帮忙配置定时任务。
+**交付报告后，不要只发一句"建议定时跑"的文字提醒，必须直接弹出选项让用户点选。**
+
+### 弹框内容（必须三选一）
+
+优先用运行环境自带的选项弹框能力（如 Claude Code 的 `AskUserQuestion`）。环境不支持弹框时，把同样的三个选项以编号形式写在正文末尾，等用户回复编号。
+
+> **要不要把盘中热点追踪设成定时任务，每个交易日盘中自动跑？**
+>
+> 1. **每个交易日 10:00（推荐）** — 开盘 30 分钟后，早盘热点与催化逻辑已初步明朗
+> 2. **自定义时间** — 自己指定几点、每周哪几天（可设多个时点，如 10:00 和 14:00 各跑一次）
+> 3. **暂不设置** — 这次先看报告，以后需要随时说
+
+选「自定义时间」时，必须追问**几点跑、每周哪几天**。并提醒用户：**盘中热点只在 9:30–11:30 / 13:00–15:00 交易时段内有意义**；下午再跑一次能捕捉午后新题材，但**每多跑一次就多消耗一份 Cue 积分**。
+
+### 铁律
+
+- **禁止擅自开启**：用户没有明确选择时间之前，不得创建任何定时任务、cron、launchd。
+- **禁止只发文字**：文字提醒不算完成，必须给出可点选的选项。
+- **每次交付问一次**：用户配置成功或明确选「暂不设置」后，后续交付不再重复打扰。
+- **禁止谎称已设**：当前客户端不支持定时任务时，给出时点清单让用户自行设提醒，并说明未配置。
+
+### 用户选定后怎么配
+
+统一用同一套命令跑（`<skill根目录>` 换成该 skill 的实际安装路径）：
+
+```bash
+TS=$(date +%Y-%m-%d-%H%M)
+python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
+  --query "今日A股实时热点板块扫描与催化逻辑分析" \
+  --template-id template_maVyo- \
+  --output ~/cue-reports/$TS-hotspot-tracker.md \
+&& python3 <skill根目录>/scripts/render.py ~/cue-reports/$TS-hotspot-tracker.md \
+  -o ~/cue-reports/$TS-intraday-longshot.png
+```
+
+按运行环境选一种落地方式：
+
+| 环境 | 配置方式 |
+|------|---------|
+| Claude Code | 用 `CronCreate`，cron 表达式 `0 10 * * 1-5`（自定义时间按用户所选取 分 时 日 月 周）；触发时由 agent 完整执行「跑研究 → 出两张图 → 交付」，与手动跑一致 |
+| macOS | 建 `~/Library/LaunchAgents/com.cue.hotspot-tracker.plist`，`StartCalendarInterval` 设 `Weekday` 1–5、`Hour` 10、`Minute` 0，再 `launchctl load`；只跑上面这条 shell 链路（报告 + 长图） |
+| Linux | `crontab -e` 追加 `0 10 * * 1-5 <上面的脚本>` |
+
+配完必须回报三件事：**触发时间、输出目录、如何关掉**（Claude Code 删任务 / `launchctl unload` / `crontab -e` 删除对应行）。
+
+### 必须提前告知的三个坑
+
+- **每次运行都会消耗 Cue 积分**；设多个时点按次数叠加，余额不足时当天会失败并提示充值，不会自动跳过。
+- **无界面跑批出不全两张图**：launchd / crontab 只能自动出报告 md + 报告长图；看板图需要 agent 先重排 SOP JSON，须下次交互时基于已落盘的 `.md` 补生成。Claude Code 的 `CronCreate` 触发时会叫醒 agent，可完整出两张图。
+- **法定节假日仍会触发**：cron 只认周一到周五；节假日可能返回空结果或沿用前一交易日数据，属正常现象。报告与图片只落盘 `~/cue-reports/`，不会推送，需要自己打开看。
 
 ---
 
@@ -162,7 +211,7 @@ fi
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：在 [cuecue.cn](https://cuecue.cn/hub/api-key) 获取，`cue login` 写入 `~/.cue/config.json`。新账号送 500 积分。
+Cue API Key：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-hotspot-tracker) 获取，`cue login` 写入 `~/.cue/config.json`。新账号送 500 积分。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 
@@ -216,7 +265,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-hotspot-tracker) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源 | 公开网站 | Cue 用缓存兜底，标注"来源暂不可达" |
 
@@ -235,7 +284,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-hotspot-tracker) 生成后发给你（Agent 无法代生成，也无权查看） |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 
@@ -335,7 +384,7 @@ A: 打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**�
 ## 参考
 
 - Cue 平台首页：https://cuecue.cn
-- API Key 管理：https://cuecue.cn/hub/api-key
+- API Key 管理：https://cuecue.cn/api-key?src=github-hotspot-tracker
 - 付费订阅页面：https://cuecue.cn/pay
 
 出图相关文件：

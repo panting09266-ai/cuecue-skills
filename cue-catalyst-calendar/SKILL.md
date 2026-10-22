@@ -85,7 +85,7 @@ A：不能，这是它的设计边界。它只负责告诉你「10 月 28 日发
 A：会。预约披露日可能被公司改期。所以提醒触发时会再核对一次当日是否已实际披露，并明确标注「以当日实际披露为准」。
 
 **Q：我是第一次用 Cue，需要准备什么？**
-A：如果只是排日历，什么都不用准备。如果想跑深度研究报告，需要先注册 Cue 拿一个 API Key（[cuecue.cn/api-key](https://cuecue.cn/hub/api-key)）并装好运行环境——AI 会一步步引导你，并在开跑前先检查环境是否就绪。
+A：如果只是排日历，什么都不用准备。如果想跑深度研究报告，需要先注册 Cue 拿一个 API Key（[cuecue.cn/api-key](https://cuecue.cn/api-key?src=github-catalyst-calendar)）并装好运行环境——AI 会一步步引导你，并在开跑前先检查环境是否就绪。
 
 ---
 
@@ -232,7 +232,7 @@ echo "=== 检查3 Cue 服务 ===" && curl -sS --max-time 10 "https://cuecue.cn/a
 
 **第 2 步 · 新用户开通道 —— 三步**（口径以 `cue-deep-research` 现值为准，不抄死）：
 
-- ① **注册取 Key** —— [cuecue.cn/api-key](https://cuecue.cn/hub/api-key) 注册获取 Cue API Key。计费事实只转述服务端口径：新账号送免费积分、每天再免费送 10 分，**实际扣数以服务端返回为准**（同铁律 5，本文不报死数）。
+- ① **注册取 Key** —— [cuecue.cn/api-key](https://cuecue.cn/api-key?src=github-catalyst-calendar) 注册获取 Cue API Key。计费事实只转述服务端口径：新账号送免费积分、每天再免费送 10 分，**实际扣数以服务端返回为准**（同铁律 5，本文不报死数）。
 - ② **装 runner** —— 跑 `cue-deep-research` 自带的一键安装脚本 `bash setup.sh`（检查依赖 → 克隆 runner → 验证 Key → 测试连通性；内置 GitHub / Gitee 双源自动切换）。依赖仅 `git` + `python3` + `curl`，Python 只用标准库。装完 runner 落在 `~/.cue/cue-skills/cue-research/scripts/research_run.py`。
 - ③ **验证** —— 重跑第 1 步预检，三项全绿才算开通道完成。
 

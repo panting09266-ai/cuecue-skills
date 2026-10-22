@@ -94,7 +94,7 @@ https://cuecue.cn/share/<conv_id>
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/hub/api-key) 注册获取，`cue login` 写入。新账号送 500 积分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-asset-allocation) 注册获取，`cue login` 写入。新账号送 500 积分。
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 
@@ -157,7 +157,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-asset-allocation) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源 | 公开网站 | Cue 用缓存兜底，标注"来源暂不可达" |
 
@@ -176,7 +176,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-asset-allocation) 生成后发给你（Agent 无法代生成，也无权查看） |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 
@@ -273,5 +273,5 @@ A: 打开 [cuecue.cn](https://cuecue.cn/)，点击页面左下角「获取专属
 ## 参考
 
 - Cue 平台首页：https://cuecue.cn
-- API Key 管理：https://cuecue.cn/hub/api-key
+- API Key 管理：https://cuecue.cn/api-key?src=github-asset-allocation
 - 付费订阅页面：https://cuecue.cn/pay

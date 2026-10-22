@@ -259,7 +259,7 @@ Omni MCP 返回结构化错误，包含 `code`（错误码）、`failure_scope`�
 
 ## 环境要求
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/hub/api-key) 注册获取，复用通用 Cue Key，无需创建 Omni 专用 Key。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-omni-reader) 注册获取，复用通用 Cue Key，无需创建 Omni 专用 Key。
 
 免费额度：新用户注册一次性 500 积分赠礼 + 每天 10 免费积分；邀请好友加入再送500积分赠礼。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。详见「积分不足专项提示」。
 
@@ -311,7 +311,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-omni-reader) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
 | MCP 连接（streamable-http） | Cue 运维 | 等恢复，或改用本地 npx Bridge（注意：反爬站点 URL 只能走远程端点，见「路由规则」） |
 | 本地 Bridge（npx） | 你 | `npx -y @cueai/omni-reader-mcp setup` 重装，确认 Node.js >= 20.12 |
 | Cue 解析服务 | Cue 运维 | 等恢复，或走降级方案 |
@@ -331,7 +331,7 @@ echo "=== 3/3 Node.js ===" && node -v 2>/dev/null && npx -v 2>/dev/null && echo 
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/hub/api-key) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-omni-reader) 生成后发给你（Agent 无法代生成，也无权查看） |
 | MCP 连接 | `已连接 (3 工具)`（该检查探测的是远程端点；本地 Bridge 为 7 工具） | 等 5 分钟重试，检查网络/DNS |
 | Node.js | `就绪` | `brew install node` 或 [nodejs.org](https://nodejs.org) |
 
@@ -456,5 +456,5 @@ A: PDF / Word / Excel / PPT / 图片（PNG/JPG/BMP/GIF/WebP/HEIC/AVIF）/ 音频
 ## 参考
 
 - cue-omni-reader产品体验页：https://cuecue.cn/hub/omni-reader
-- API Key 管理：https://cuecue.cn/hub/api-key
+- API Key 管理：https://cuecue.cn/api-key?src=github-omni-reader
 - 付费订阅页面：https://cuecue.cn/pay
