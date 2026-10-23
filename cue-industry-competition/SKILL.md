@@ -2,7 +2,7 @@
 name: cue-industry-competition
 description: 用 Cue 穿透目标行业的景气周期、竞争格局与产业链地位——识别集中度、龙头壁垒与供需/政策拐点，研判当前所处周期位置与投资机会窗口，产出可支撑配置决策的行业研判底稿。
 description_zh: Cue 行业景气与竞争格局研判：穿透景气周期/竞争格局/产业链地位，识别拐点与投资机会窗口。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, industry-analysis, competitive-landscape, cycle-timing, 行业景气, 竞争格局, 产业链分析, 周期研判]
 ---
@@ -108,7 +108,7 @@ fi
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-industry-competition) 注册获取。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-industry-competition) 注册后免费创建。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

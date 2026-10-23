@@ -3,7 +3,7 @@ name: cue-fund-penetration
 displayName: 基金组合持仓穿透分析
 description: 用 Cue 穿透你的基金组合持仓——你以为分散了，其实买了一篮子同样的东西。逐层拆解股票/行业/风格暴露，检测重复配置与集中度风险，逐只排雷。
 description_zh: 基金组合持仓穿透分析（公募基金组合穿透）：穿透持仓底层资产，检测重复配置与集中度风险，真正的分散才叫分散。
-version: 1.2.1
+version: 1.2.2
 author: sensedeal
 tags: [cue, fund-penetration, portfolio-analysis, concentration-risk, 基金, 持仓穿透, 重复配置, 集中度风险, 组合诊断, 基金组合查重, 基金买重了]
 ---
@@ -181,7 +181,7 @@ fi
 
 依赖：`git` + `python3` + `curl`（macOS 自带，Linux `apt install git python3 curl`）。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-fund-penetration) 注册获取。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-fund-penetration) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

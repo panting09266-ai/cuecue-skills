@@ -4,7 +4,7 @@ name: cue-sector-etf
 Name: 热门赛道与ETF深度投研
 description: 用 Cue 一键深度拆解热门赛道与ETF——赛道全景分析、同类ETF横向对比、底层持仓穿透、估值水位研判，告诉你"这条赛道值不值得投、哪只ETF更匹配"。
 description_zh: Cue 热门赛道与ETF深度投研：赛道全景+ETF横向对比+持仓穿透+估值研判，选赛道选ETF不再凭感觉。
-version: 1.1.1
+version: 1.1.2
 author: sensedeal
 tags: [cue, sector-research, ETF, thematic-investing, 赛道分析, ETF对比, 行业研究, 主题投资, 估值]
 ---
@@ -186,7 +186,7 @@ fi
 
 依赖：`git` + `python3` + `curl`（macOS 自带，Linux `apt install git python3 curl`）。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-sector-etf) 注册获取。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-sector-etf) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

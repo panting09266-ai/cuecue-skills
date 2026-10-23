@@ -2,7 +2,7 @@
 name: cue-overseas-litigation
 slug: cue-overseas-litigation
 displayName: 境外诉讼案例库
-version: 1.3.0
+version: 1.3.1
 description: >
   境外诉讼案例库 — 围绕一个主题检索主要法域的公开判例与监管公告，归纳诉因、判决倾向与对中国主体的合规启示。
   Triggers: 境外诉讼、海外官司、跨境诉讼、海外判例、境外监管公告、国际诉讼案例、制裁案例、出口管制案例、涉外法律检索、overseas litigation、cross-border litigation
@@ -115,7 +115,7 @@ else
 fi
 ```
 
-Cue API Key：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-overseas-litigation) 注册获取，新账号送 500 积分 + 每天 10 积分。写入 `~/.cue/config.json`：
+Cue API Key：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-overseas-litigation) 注册后免费创建，新账号送 500 积分 + 每天 10 积分。写入 `~/.cue/config.json`：
 
 ```bash
 mkdir -p ~/.cue

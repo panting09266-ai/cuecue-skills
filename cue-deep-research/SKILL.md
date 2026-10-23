@@ -3,7 +3,7 @@ name: cue-deep-research
 displayName: Cue 深度研究（通用版）
 description: Cue 深度调研通用版——通过 Cue 服务端调用公开数据源完成多维度交叉验证研究。覆盖A股/港股/美股/工商/司法/监管/研报/资金流/招投标等公开数据，每条结论带原链接可回查。仅限公开信息检索，不处理个人数据或非公开信息。支持仿写（mimic），让报告模仿指定文档的写作风格。触发词：深度研究、调研分析、竞品对标、行业趋势、基本面分析
 description_zh: Cue 深度研究通用版：470+数据工具、多源交叉验证、100%溯源、支持仿写。覆盖A股/港股/美股/工商/司法/监管/研报/资金流/招投标等公开数据源，仅限公开信息检索。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, deep-research, general-purpose, cross-validation, traceability, mimic, 深度研究, 溯源, 仿写, 交叉验证, 通用]
 ---
@@ -139,7 +139,7 @@ fi
 
 依赖：`git` + `python3` + `curl`（macOS 自带，Linux `apt install git python3 curl`）。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-deep-research) 注册获取。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-deep-research) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 

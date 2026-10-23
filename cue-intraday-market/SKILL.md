@@ -2,7 +2,7 @@
 name: cue-intraday-market
 description: 用 Cue 做大盘盘中分析——聚合早盘核心行情，穿透指数表象识别市场真实情绪与资金流向，定位逆势主线与风险雷区，输出盘中观察评论。
 description_zh: Cue 大盘盘中分析：穿透指数看情绪/资金/主线/风险，输出盘中观察评论。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, intraday, market-overview, panel-analysis, 盘中分析, 盘面透视, 市场情绪, 资金流向, 主线]
 ---
@@ -93,7 +93,7 @@ https://cuecue.cn/share/<conv_id>
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-intraday-market) 注册获取。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-intraday-market) 注册后免费创建。
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 

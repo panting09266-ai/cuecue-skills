@@ -2,7 +2,7 @@
 name: cue-stock-valuation
 description: 用 Cue 对个股进行全周期估值分析——融合短线资金流向与中长线估值模型，短期看情绪博弈与支撑压力，中长期看业绩兑现与安全边际。
 description_zh: Cue 个股估值与股价分析：短/中/长三周期融合分析，资金面+估值模型+业绩兑现。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, stock-valuation, equity-analysis, 个股估值, 股价分析, 估值模型, 财务分析]
 ---
@@ -107,7 +107,7 @@ else
 fi
 ```
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-stock-valuation) 注册获取。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-stock-valuation) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

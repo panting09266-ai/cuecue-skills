@@ -3,7 +3,7 @@ slug: podcast-deep-dive
 name: 播客深度提取转文字
 description: 输入一期播客（小宇宙、喜马拉雅）链接，输出**带时间戳、区分说话人**的完整文字稿，并附一份深度总结分析（主旨、结构大纲、分人对谈要点、金句、提及的书/人名/数据）。底层经 Cue Omni Reader 远程端点解析（ASR + 说话人分离，自动绕过平台反爬），再由大模型按播客场景加工交付。
 description_zh: Cue 播客深度提取：小宇宙/喜马拉雅单集链接直达，带时间戳分说话人转写稿 + 深度总结分析。
-version: 1.0.0
+version: 1.0.1
 author: sensedeal
 tags: [cue, podcast, 播客, 小宇宙, 喜马拉雅, 转文字, 转录, 摘要, 说话人分离, audio, asr, omni-reader]
 ---
@@ -37,7 +37,7 @@ tags: [cue, podcast, 播客, 小宇宙, 喜马拉雅, 转文字, 转录, 摘要,
 
 ## 前置依赖（新用户首次使用只需做这一件事）
 
-- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。获取：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-podcast-deep-dive)（新账号送 500 积分 + 每天 10 免费积分）。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。
+- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-podcast-deep-dive)（新账号送 500 积分 + 每天 10 免费积分）。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。
 
   ```bash
   export CUE_API_KEY="sk你的key"

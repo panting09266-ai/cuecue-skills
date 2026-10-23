@@ -2,7 +2,7 @@
 name: cue-enterprise-panorama
 description: 用 Cue 一键穿透企业的工商、股权、财务与经营全维基本面——评估业务模式与合作适配性，挖掘供应链金融与产业债机会，产出可用于内部决策的尽调底稿。
 description_zh: Cue 企业全景画像：一键穿透工商/股权/财务/经营全维度，产出尽调底稿。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, enterprise-panorama, due-diligence, 企业尽调, 企业画像, 信贷尽调, 供应链金融]
 ---
@@ -95,7 +95,7 @@ https://cuecue.cn/share/<conv_id>
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-enterprise-panorama) 注册获取，新用户注册即送500积分免费试用。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-enterprise-panorama) 注册后免费创建，新用户注册即送500积分免费试用。
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 

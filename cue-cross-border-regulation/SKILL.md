@@ -2,7 +2,7 @@
 name: cue-cross-border-regulation
 slug: cue-cross-border-regulation
 displayName: 跨境法规调研
-version: 1.2.0
+version: 1.2.1
 description: >
   专为出海企业法务、合规官及涉外律师打造的 AI 跨境法规调研助手。解决境外法规「查不到、看不懂、判不准」的三大痛点。它直连 EUR-Lex、GovInfo、新加坡 Statutes 等海外官方权威数据库，为你精准捞出目标法域的法规原文、提炼立法背景与适用边界。全中文交付研究报告，核心条款中英对照，每个结论均附带官方公报出处链接，可逐条溯源。让出海合规尽调、涉外诉讼查明、跨境比较法研究从此高效且有据可依。
   Triggers: 跨境法规、境外法规、外国法律、海外法规调研、欧盟法规、美国法律、GDPR、DMA、SEC规则、CFIUS、跨境合规、cross-border regulation、foreign law
@@ -45,7 +45,7 @@ metadata:
 
 ## 快速开始（仅需 1 步）
 
-🔑 **获取调用密钥**：前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-cross-border-regulation) 免费注册获取 API key（新账号送 500 积分，每天再送 10 积分）。
+🔑 **注册后免费创建 API Key**：先打开 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-cross-border-regulation) 免费注册账号；登录后进入 API Key 页面，点击「创建 API Key」即可免费生成（新账号送 500 积分，每天再送 10 积分）。
 
 *(拿到 Key 后直接发给本 AI 助手，它会自动完成网络探测、海外数据库检索及报告生成，您只需安心等待。)*
 

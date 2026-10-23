@@ -3,7 +3,7 @@ name: cue-personal-legal-assistant
 display_name: 个人法律助手
 display_name_en: Personal Legal Assistant
 displayName: 个人法律助手
-version: 1.3.0
+version: 1.4.1
 description: >
   个人法律助手 — 大众个人遇到法律疑难问题，别急着打官司：把情况说清楚，它帮你做个性化分析、给出解决方案——拿不准的先看同类案子法院怎么判、大概赔多少；真要打官司，帮你起草起诉状、答辩状等文书或审校已有文书；还能查法规、研判问题、逐条解读、对比中外规定。每个结论都带来源链接、可逐条回查，普通人维权心里有底，律师办案更快更有据。
 description_zh: >
@@ -105,7 +105,6 @@ metadata:
 
 > 一句话：流程引擎告诉你「该做什么」，Cue 帮你「把该做的做出来」——尤其是需要深度分析、多源搜索、专业数据的那一步。
 
-
 ## 先试这 5 个（大白话直接丢）
 
 | 你这样说 | 你得到什么 |
@@ -120,7 +119,7 @@ metadata:
 
 ## 使用前（只需 1 步）
 
-🔑 **获取密钥**：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-personal-legal-assistant) 免费注册，获取 API key（现在注册送 500 积分）。
+🔑 **注册后免费创建 API Key**：先打开 [cuecue.cn](https://cuecue.cn/api-key?src=github-personal-legal-assistant) 免费注册账号；登录后进入 API Key 页面，点击「创建 API Key」即可免费生成（现在注册送 500 积分）。
 
 *(拿到 key 后直接发给助手即可，剩下的环境依赖和配置统统由 AI 助手全自动为你完成！)*
 
@@ -150,6 +149,17 @@ metadata:
 
 > 💡 **隐私保护提示**：建议在描述案情时，将真实的姓名、身份证号、银行卡号等替换为“张三”、“李四”或“某公司”。**系统默认开启隐私保护：解析后不在服务端保留源文件或结果缓存。**
 
+## 启动告知（必须执行）
+
+简单问法条、问流程通常秒回；触发深度研判（出分析报告、文书、核算清单）时会跑 Cue，**发出运行命令后立即**向用户发一次预期说明，不要等结果生成完才说：
+
+> 已开始深度研判，预计 **3-15 分钟（多数 5-10 分钟）**。这期间**不用重复发同一问题**——重复提交会新建任务、重复消耗积分；完成后我会把结果和 Cue 原始链接一起发你。超过 15 分钟还没出来，我帮你查进度。
+
+规则：
+- **必须先说再跑**（最晚与运行命令同一轮回复），不得只发命令让用户干等。
+- 等待期间用户再次追问**同一问题**时：**不新建任务**，回复当前任务仍在生成并说明已等待时长；超过 15 分钟才按「中途中断」流程查进度或续接。
+- 用户补充案情、换问题类型或追问细节，属于新问题，可正常受理，不算重复提交。
+
 ## 交付规范（必须执行）
 
 把最终报告发送给用户时，**必须同时附带 Cue 原始报告链接**，方便用户回到网页端查看完整原文、继续追问或转发同事。
@@ -170,12 +180,15 @@ https://cuecue.cn/share/<conv_id>
 ---
 **Cue 原始报告**：https://cuecue.cn/share/<conv_id>
 **本地副本**：~/cue-reports/<文件名>.md
+**cue剩余积分 <N>**
 ```
 
 规则：
 - `conv_id` 必须取自实际输出，**禁止编造**或使用文档示例里的 id。
 - 末行为 `RESULT empty`（无 conv_id 或报告为空）时**不要拼链接**，如实告知未取到报告并给后续建议。
 - 用户明确说不要链接时可不附。
+- **每次回答的最后一行都必须输出 `cue剩余积分 <N>`**（包括快问快答、没出报告的简短回复）；`<N>` 取本轮提问前查询到的剩余积分，整数不带小数，非整数保留 1 位。查询失败时省略这一行，不要写「未知」「查询失败」等占位。
+- 积分行与报告链接独立：不出报告的回答也要有积分行。
 
 ## 能干啥
 
@@ -213,7 +226,7 @@ https://cuecue.cn/share/<conv_id>
 
 **执行前置与环境准备（重要）：**
 用户只需提供 API key，Agent 需自行完成运行环境准备。本 skill 不自带脚本，靠 Cue 开源 runner 跑研究。
-1. 检查 API Key：如果 `~/.cue/config.json` 不存在或未包含有效 key，请提示用户提供其在 cuecue.cn 获取的 API key，并由你（Agent）为其写入。
+1. 检查 API Key：如果 `~/.cue/config.json` 不存在或未包含有效 key，请提示用户提供其在 cuecue.cn 创建的 API key，并由你（Agent）为其写入。
 2. 先确认 runner 是否就绪：
    若你已安装 `cue-skills`（或本 skill 来自整包发布）→ 直接用其中的 `cue-research/scripts/research_run.py`，跳过本节。
    否则克隆开源仓（含 cue-research + cue-buddy 全套依赖），有则更新、无则克隆（GitHub 不通走镜像）：
@@ -224,7 +237,22 @@ https://cuecue.cn/share/<conv_id>
      git clone https://github.com/sensedeal/cue-skills ~/.cue/cue-skills \
        || git clone https://gitee.com/sensedeal/cue-skills ~/.cue/cue-skills
    fi
- 之后 runner 路径为：`~/.cue/cue-skills/cue-research/scripts/research_run.py`。需 git + python3（runner 仅用标准库）。
+   ```
+
+   之后 runner 路径为：`~/.cue/cue-skills/cue-research/scripts/research_run.py`。需 git + python3（runner 仅用标准库）。
+
+**每次提问前查询积分余额（必须执行）：**
+
+收到用户的每个新问题后、判断意图之前，先用用户的 API Key 调「当前订阅查询」接口，拿到当下可用积分（同一个问题只查一次，不要轮询）：
+
+```bash
+KEY=$(python3 -c "import json;print(json.load(open('$HOME/.cue/config.json'))['api_key'])")
+curl -sS 'https://cuecue.cn/api/v1/billing/subscriptions/current' -H "Authorization: Bearer $KEY"
+```
+
+- **剩余积分 = `available_credits` + `permanent_credits_balance`**：前者只含每日剩余 + 周期剩余，后者是永久额度，两者相加才是用户当前可用的全部积分。
+- 接口返回 `null`、401 或网络失败时：**不中断任务、不向用户抛错误**，本次回答照常进行，只是省略结尾的积分行；最多重试 1 次。
+- 该接口在租户无订阅时会自动创建免费订阅，不要高频调用，每个用户问题 1 次即可。
 
 **容错、重试与错误提示（重要，直接影响体验与可靠性评分）：**
 
@@ -254,6 +282,7 @@ https://cuecue.cn/share/<conv_id>
 
 | 顺序 | 做什么 | 禁止 |
 | :--- | :--- | :--- |
+| 0 | 提问前查积分：`GET /api/v1/billing/subscriptions/current`（Bearer API Key），记下剩余积分 | 禁止高频轮询；查询失败不阻断任务 |
 | 1 | 判意图选搭子（按下表语义匹配，非关键词裸选） | 禁止只看 title 关键词 |
 | 2 | 确认 credits：显式问「将用搭子 X 跑【问题】，耗 credits，是否继续？」并等确认 | 禁止未确认就跑 |
 | 3 | 一条命令阻塞等待，3–15 分钟 | 禁止连发多条 |

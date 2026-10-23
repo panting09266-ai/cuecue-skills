@@ -2,7 +2,7 @@
 name: cue-ip-bidding-check
 description: 用 Cue 整合企业专利、软著、商标、资质许可、招投标与融资记录——判断公开可见的技术能力与商业落地证据，产出可复核的硬实力证据底稿。
 description_zh: Cue 知识产权资质与招投标尽调：整合专利/软著/商标/资质许可/招投标/融资记录，产出硬实力证据底稿。
-version: 1.1.1
+version: 1.1.2
 author: sensedeal
 tags: [cue, ip-check, bidding, due-diligence, 知识产权, 招投标, 资质尽调, 硬实力尽调]
 ---
@@ -109,7 +109,7 @@ Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue
 
 依赖：`git` + `python3`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-ip-bidding-check) 注册获取。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-ip-bidding-check) 注册后免费创建。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

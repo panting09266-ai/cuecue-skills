@@ -4,7 +4,7 @@ name: cue-pre-market-strategy
 Name: 今日盘前机会
 description: 每天开盘前 3 分钟，看懂今天 A 股的机会与风险——自动扫隔夜美股、政策、产业新闻，大白话讲清利好利空，排出今日最值得关注的方向清单。
 description_zh: Cue 今日盘前机会：每天开盘前 3 分钟，扫隔夜大事，看懂今天 A 股机会与风险。
-version: 1.2.0
+version: 1.2.1
 author: sensedeal
 tags: [cue, pre-market, trading-strategy, 今日盘前机会, 盘前机会, 盘前热点, 盘前掘金, 开盘前必看]
 ---
@@ -117,7 +117,7 @@ curl -sS --max-time 10 "https://cuecue.cn/api/templates" \
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-pre-market-strategy) 注册获取。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-pre-market-strategy) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。
 
 - **积分赠送**：新注用户赠送 500 积分，邀请新用户再送 500 积分。
 - **积分不足**：积分用完后，前往 [cuecue.cn/pay](https://cuecue.cn/pay) 页面进行订阅。

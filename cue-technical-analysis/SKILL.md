@@ -2,7 +2,7 @@
 name: cue-technical-analysis
 description: 用 Cue 对个股做短线走势与技术面分析——从量价关系、资金流向、趋势结构入手，计算波动率与最大回撤，产出可复核的走势分析底稿，辅助判断短线的买卖节奏和关键价位。
 description_zh: Cue 短线走势与技术面分析：穿透量价关系/资金流向/趋势结构/支撑压力位，产出可复核的走势底稿。
-version: 1.2.0
+version: 1.2.1
 author: sensedeal
 tags: [cue, technical-analysis, short-term-trading, quantity-price, 短线分析, 技术分析, 量价分析, 资金流向, 支撑压力位]
 ---
@@ -155,7 +155,7 @@ python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-technical-analysis) 注册获取。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-technical-analysis) 注册后免费创建。
 
 - **积分赠送**：新注用户赠送 500 积分，邀请新用户再送 500 积分。
 - **积分不足**：积分用完后，前往 [cuecue.cn/pay](https://cuecue.cn/pay) 页面进行订阅。

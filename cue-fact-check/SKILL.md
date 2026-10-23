@@ -2,7 +2,7 @@
 name: cue-fact-check
 description: 用 Cue 穿透待核查资讯的表层表述——通过独立信源交叉验证与底层数据复核，精准识别时间错位、数据偏差及误导性信息，产出包含原文对照与纠偏证据的结构化事实核查报告。
 description_zh: Cue 事实核查：多源交叉验证，识别时间错位/数据偏差/误导信息，产出原文对照与纠偏证据。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, fact-check, verification, cross-validation, 事实核查, 交叉验证, 信息纠偏, 深度核查]
 ---
@@ -108,7 +108,7 @@ fi
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-fact-check) 注册获取。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-fact-check) 注册后免费创建。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

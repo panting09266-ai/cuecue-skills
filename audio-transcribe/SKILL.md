@@ -3,7 +3,7 @@ name: audio-transcribe
 displayName: 音频录音转文字（区分人声）
 description: 输入一段音频录音文件——本地音频文件（MP3/WAV/M4A/AAC/FLAC/OGG）或在线音频链接——输出**带时间戳、可区分说话人**的文字稿，并附一份总结分析。底层经 Cue Omni Reader 解析（ASR 语音识别 + 说话人分离），再由大模型分段整理交付。适用于会议录音、访谈、讲座、通话录音、口述笔记等。
 description_zh: Cue 录音转文字：本地音频或链接一键转录，带时间戳、区分说话人，并给出总结分析。
-version: 1.0.0
+version: 1.0.1
 author: sensedeal
 tags: [cue, audio, transcription, asr, 录音转文字, 语音转文字, 会议纪要, 访谈转录, 说话人分离, 会议记录, omni-reader]
 ---
@@ -42,7 +42,7 @@ tags: [cue, audio, transcription, asr, 录音转文字, 语音转文字, 会议�
 
 ## 前置依赖（新用户首次使用只需做这一件事）
 
-- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。获取：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-audio-transcribe)（新账号送 500 积分 + 每天 10 免费积分）。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。
+- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-audio-transcribe)（新账号送 500 积分 + 每天 10 免费积分）。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。
 
   ```bash
   export CUE_API_KEY="sk你的key"

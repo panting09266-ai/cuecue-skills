@@ -4,7 +4,7 @@ name: cue-earnings-analysis
 displayName: 上市公司财报分析
 description: 用 Cue 对上市公司最新财报做深度分析——从营收利润变动、业务驱动、利润含金量、产业链话语权到财务风险信号，产出一份带来源出处的业绩点评，帮个人投资者看懂一家公司的盈利情况，作为选股和股票分析的一环。
 description_zh: Cue 上市公司财报分析：看懂营收利润/业务驱动/利润含金量/产业链话语权/财务风险，产出带溯源的业绩点评，选股基本面一环。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, earnings-analysis, financial-analysis, equity-research, 财报分析, 业绩分析, 财报解读, 业绩点评, 上市公司, 选股, 基本面, 财务分析]
 ---
@@ -152,7 +152,7 @@ curl -sS --max-time 10 "https://cuecue.cn/api/templates" \
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-earnings-analysis) 注册获取。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-earnings-analysis) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

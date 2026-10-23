@@ -2,7 +2,7 @@
 name: cue-person-background-check
 description: 用 Cue 穿透人物的全生命周期工商与司法轨迹——剥离当前在册与历史风险、映射其商业控制版图，产出可用于 IPO 或重大交易的个人背调底稿。
 description_zh: Cue 个人背调底稿：穿透人物工商/司法全生命周期轨迹，映射商业控制版图，产出IPO级背调底稿。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, background-check, person-check, due-diligence, 个人背调, 人物核查, 高管尽调, IPO尽调]
 ---
@@ -114,7 +114,7 @@ else
 fi
 ```
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-person-background-check) 注册获取。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-person-background-check) 注册后免费创建。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

@@ -3,7 +3,7 @@ name: cue-contract-risk-review
 display_name: 合同风控与合规审查
 display_name_en: Contract Risk & Compliance Review
 displayName: 合同风控与合规审查
-version: 1.1.0
+version: 1.1.1
 description: >
   站在指定一方立场逐条审查合同条款，核验主体与效力瑕疵、钱货闭环、违约责任与管辖约定，
   输出带风险分级（高/中/低）和可直接采纳修改建议的排查表。支持上传合同文件，从现行法规、
@@ -80,9 +80,9 @@ metadata:
 
 ## 使用前配置（全自动装配）
 
-🔑 **获取调用密钥**：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-contract-risk-review) 免费注册获取 API key（新注用户赠送 500 积分）。
+🔑 **注册后免费创建 API Key**：先打开 [cuecue.cn](https://cuecue.cn/api-key?src=github-contract-risk-review) 免费注册账号；登录后进入 API Key 页面，点击「创建 API Key」即可免费生成（新注用户赠送 500 积分）。
 
-*(获取密钥后，直接将其发送给当前的 AI 助手，并对它说：“**这是我的 key，请帮我配好环境。**” 助手会自动为你拉取底层脚本、写入配置文件。)*
+*(创建好 Key 后，直接将其发送给当前的 AI 助手，并对它说：“**这是我的 key，请帮我配好环境。**” 助手会自动为你拉取底层脚本、写入配置文件。)*
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

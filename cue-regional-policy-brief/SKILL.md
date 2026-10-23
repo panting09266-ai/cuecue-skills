@@ -2,7 +2,7 @@
 name: cue-regional-policy-brief
 description: 用 Cue 聚合指定区域的政策发布、招商动态及市场数据——筛选高价值合规线索与潜客名单，产出结构化周度情报简报，赋能律所 BD 团队精准获客。
 description_zh: Cue 区域政策商机简报：聚合区域政策/招商/市场数据，筛选合规线索与潜客名单，赋能律所BD获客。
-version: 1.3.0
+version: 1.3.1
 author: sensedeal
 tags: [cue, regional-policy, business-brief, lead-generation, 区域政策, 商机简报, 招商动态, BD获客]
 ---
@@ -171,7 +171,7 @@ else
 fi
 ```
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-regional-policy-brief) 注册获取。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-regional-policy-brief) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

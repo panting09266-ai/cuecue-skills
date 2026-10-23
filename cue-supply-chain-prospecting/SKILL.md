@@ -2,7 +2,7 @@
 name: cue-supply-chain-prospecting
 description: 用 Cue 沿核心企业客户/供应商/招投标关系链，挖掘产业链上下游可拓展名单——给出每家切入点和可能的金融需求，助力对公客户经理精准拓客。
 description_zh: Cue 产业链上下游拓客：沿客户/供应商/招投标关系链挖掘拓客名单，输出切入点和金融需求。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, supply-chain, prospecting, business-development, 产业链, 拓客, 对公营销, 供应链金融]
 ---
@@ -125,7 +125,7 @@ else
 fi
 ```
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-supply-chain-prospecting) 注册获取。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-supply-chain-prospecting) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

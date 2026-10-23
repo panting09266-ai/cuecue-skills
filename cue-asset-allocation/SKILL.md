@@ -2,7 +2,7 @@
 name: cue-asset-allocation
 description: 用 Cue 一键生成月度大类资产配置报告——整合全球 CPI、利率、国内宏观及资金流向，从宏观逻辑推导至股/债/商配置比例，产出可交付客户的配置建议书。
 description_zh: Cue 大类资产配置月报：整合全球宏观数据，一键生成股/债/商月度配置建议书。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, asset-allocation, macro, portfolio, 资产配置, 大类资产, 宏观, 配置月报]
 ---
@@ -94,7 +94,7 @@ https://cuecue.cn/share/<conv_id>
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-asset-allocation) 注册获取，`cue login` 写入。新账号送 500 积分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-asset-allocation) 注册后免费创建，`cue login` 写入。新账号送 500 积分。
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 

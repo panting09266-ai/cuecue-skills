@@ -4,7 +4,7 @@ name: cue-equity-incentive
 Name: 股权激励查询
 description: 用 Cue 查询和分析上市公司股权激励计划与股份回购——基于市面上最全的股权激励数据库（2015年至今10年+历史覆盖），独家特有数据源。查单个计划或要素、或一次多家公司的同类要素，可直连 Cue 数据接口秒级返回；单家公司的方案设计、实施效果、同行对比，以及全市场方案盘点与趋势分析，则生成深度报告（后者走自由式深研），用真实数据评估激励方案的竞争力与合理性。
 description_zh: Cue 股权激励查询：独家最全股权激励数据库（2015年至今10年+）；单个计划/要素、多公司批量要素秒级直查；单家公司方案设计/效果评估/同行对比走股权激励搭子，全市场方案盘点与趋势分析走自由式深研；另覆盖股份回购数据。
-version: 1.5.0
+version: 1.5.1
 author: sensedeal
 tags: [cue, equity-incentive, ESOP, 股权激励, 激励方案, 市值管理, 高管激励, 股份回购, buyback]
 ---
@@ -227,7 +227,7 @@ fi
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-equity-incentive) 注册获取。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-equity-incentive) 注册后免费创建。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

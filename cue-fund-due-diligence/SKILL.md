@@ -3,7 +3,7 @@ name: cue-fund-due-diligence
 displayName: 基金值不值得买
 description: 用 Cue 一键给一只基金做全维度深度体检——基金经理画像、业绩归因、风格一致性、风险指标、费率与规模，告诉你"这只基金的历史业绩是靠运气还是靠能力"，买之前心里有底。
 description_zh: 基金值不值得买（公募基金全维尽调）：基金经理画像+业绩归因+风格检验+风险扫描，穿透净值曲线看本质。
-version: 1.2.1
+version: 1.2.2
 author: sensedeal
 tags: [cue, fund-due-diligence, fund-analysis, performance-attribution, 基金值不值得买, 基金靠谱吗, 基金尽调, 基金经理, 业绩归因, 风格分析, 风险指标]
 ---
@@ -187,7 +187,7 @@ fi
 
 依赖：`git` + `python3` + `curl`（macOS 自带，Linux `apt install git python3 curl`）。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-fund-due-diligence) 注册获取。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-fund-due-diligence) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

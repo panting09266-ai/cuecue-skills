@@ -2,23 +2,23 @@
 name: cue-hotspot-tracker
 slug: cue-hotspot-tracker
 displayName: 盘中热点与催化剂追踪
-description: 用 Cue 实时扫描今日 A 股热点板块与近 24h 催化资讯，拆解盘中催化逻辑与受益方向；跑完自动生成「看板图」与「报告长图」，报告全文以 Cue 链接交付。
-description_zh: Cue 热点追踪：实时扫描今日 A 股热点板块与近24h催化资讯，拆解催化逻辑与受益方向，识别热钱流向，并自动出看板图与报告长图。
-version: 1.4.0
+description: 用 Cue 通常 5-10 分钟（最长约 15 分钟）实时扫描今日 A 股热点板块与近 24h 催化资讯，拆解盘中催化逻辑与受益方向；跑完自动生成「看板图」与「报告长图」，报告全文以 Cue 链接交付。
+description_zh: Cue 热点追踪：通常 5-10 分钟、最长约 15 分钟，实时扫描今日 A 股热点板块与近24h催化资讯，拆解催化逻辑与受益方向，识别热钱流向，并自动出看板图与报告长图。
+version: 1.4.2
 author: sensedeal
 tags: [cue, hotspot, catalyst, trading, 热点追踪, 题材挖掘, 短线, 催化剂, 看板图, 长图, 报告转图]
 ---
 
 # 盘中热点与催化剂追踪
 
-> 短线题材捕捉手。实时扫描今日 A 股热点板块，拆解盘中催化逻辑与受益方向，助你紧跟市场热钱流向。
+> 短线题材捕捉手。通常 5-10 分钟（最长约 15 分钟）实时扫描今日 A 股热点板块，拆解盘中催化逻辑与受益方向，助你紧跟市场热钱流向。
 
 ## Agent 执行摘要
 
 | 顺序 | 做什么 | 禁止 |
 |------|--------|------|
 | 1 | 确认 Cue runner 就绪 | 禁止跳过 |
-| 2 | 告知用户耗时 2-15 分钟 | 禁止中途取消 |
+| 2 | 启动后**立即**告知用户：预计 2-15 分钟（多数 5-10 分钟），期间**不要重复提交同一问题**；超过 15 分钟再查进度 | 禁止中途取消；禁止重复提交；禁止只发命令让用户干等 |
 | 3 | 一条命令阻塞等待，`--template-id template_maVyo-` | 禁止连发多条 |
 | 4 | stdout `[cue-research] RESULT ok` = 完成 | 无 RESULT = 未完成 |
 | 5 | **直接出两张图**：报告长图（`scripts/render.py`）+ 看板图（本 agent 先重排成 SOP JSON，再 `scripts/render_dashboard.py`） | 禁止跳过重排直接塞报告原文，禁止编造报告里没有的字段 |
@@ -26,6 +26,18 @@ tags: [cue, hotspot, catalyst, trading, 热点追踪, 题材挖掘, 短线, 催�
 | 7 | 无 Chrome 时如实降级为 HTML | 禁止谎称出图 |
 | 8 | 交付后**用选项弹框**问是否设置定时：每个交易日 10:00（推荐，开盘 30 分钟后）/ 自定义时间 / 暂不设置 | 禁止只发文字提醒；禁止未经用户选择擅自开启 |
 | 9 | 遇 `INSUFFICIENT_CREDITS` 主动提示邀请链接 | 禁止只丢错误码 |
+
+## 启动告知（必须执行）
+
+发出运行命令后**立即**向用户发一次预期说明，不要等报告生成完才说：
+
+> 报告已开始生成，预计 **2-15 分钟**（多数 5-10 分钟）。这期间**不用重复发同一问题**——重复提交会新建任务、重复消耗积分；完成后我会直接出**看板图 + 报告长图**，并把 Cue 原文链接一起发你。超过 15 分钟还没出来，我帮你查进度。
+
+规则：
+- **必须先说再跑**（最晚与运行命令同一轮回复），不得只发命令让用户干等。
+- 等待期间用户再次追问**同一问题**时：**不新建任务**，回复当前任务仍在生成并说明已等待时长；超过 15 分钟才按「中途中断」流程查进度或续接。
+- 用户换行业、换方向或追问报告细节，属于新问题，可正常受理，不算重复提交。
+- 出图在报告完成后进行，**不额外消耗 Cue 积分**；但整体交付会比只有报告多花约 1-2 分钟，等待期间不用催图。
 
 ## 适用场景
 
@@ -191,11 +203,6 @@ python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
 
 ## 环境要求
 
-**首次使用运行 skill 自带的一键安装脚本**（检查依赖 → 克隆 runner → 验证 Key → 测试连通性）：
-
-```bash
-```
-
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 
 首次使用需安装 Runner（幂等，已装则拉取更新）：
@@ -211,7 +218,7 @@ fi
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-hotspot-tracker) 获取，`cue login` 写入 `~/.cue/config.json`。新账号送 500 积分。
+Cue API Key：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-hotspot-tracker) 注册后免费创建 API Key，`cue login` 写入 `~/.cue/config.json`。新账号送 500 积分。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 
@@ -231,8 +238,6 @@ python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
 | `--query` | 研究问题。可选加行业/方向限定 |
 | `--template-id` | 固定为 `template_maVyo-` |
 | `--output` | 落盘路径 |
-
----
 
 ---
 
@@ -377,6 +382,9 @@ A: 可以，在 `--query` 中说明，例如"重点关注新能源和半导体�
 
 **Q: 报告能在网页端看原文吗？**
 A: 能。交付时会附 `https://cuecue.cn/share/<conv_id>`，点开即可在网页端查看完整原文、继续追问或转发同事。
+
+**Q: 等了几分钟没动静，要不要再发一次？**
+A: 不要。同一问题重复提交会新建任务、重复消耗积分。报告通常 2-15 分钟出结果（多数 5-10 分钟），之后还要出看板图和报告长图；超过 15 分钟再让我查进度，我会沿用原任务续接，不改 prompt。
 
 **Q: 提示积分不足怎么办？**
 A: 打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**「获取专属邀请链接」分享给好友——好友加入后你再得 **500 积分**（最快）；也可以前往 [cuecue.cn/pay](https://cuecue.cn/pay) 充值（首次充值有优惠），或等次日免费额度。

@@ -2,7 +2,7 @@
 name: cue-emerging-industry
 description: 用 Cue 一键梳理陌生赛道的行业天花板、竞争格局与核心商业模式——面对新兴产业快速建立认知框架，同时映射 IPO/并购中常见的合规风险与法律争议点。
 description_zh: Cue 新兴产业研究：一键梳理赛道天花板/竞争格局/商业模式，映射IPO/并购合规风险。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, emerging-industry, industry-research, business-model, 新兴产业, 赛道研究, 商业模式, 前沿产业]
 ---
@@ -94,7 +94,7 @@ https://cuecue.cn/share/<conv_id>
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-emerging-industry) 注册获取。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-emerging-industry) 注册后免费创建。
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 

@@ -3,7 +3,7 @@ name: cue-litigation-lawyer-assistant
 display_name: 诉讼律师全能助手（专业版·不限国内）
 display_name_en: Litigation Lawyer All-in-One Assistant (Pro · Global)
 displayName: 诉讼律师全能助手（专业版·不限国内）
-version: 1.7.2
+version: 1.8.1
 description: >
   专为从事民商事及刑事诉讼的执业律师、法务打造的 AI 案头助手。将繁琐的“查、核、算、写”工作交由 AI 处理——支持秒级调用 MCP 检索现行法规原文；更支持深度研判：合同审查、疑难案件类案检索、复杂赔偿金/诉讼费自动理算、诉讼文书高质量起草与仿写、深度文书审校（自动核验法条效力与案号真伪）。直连北大法宝等权威法律数据库，产出结论均附原始链接，助力法律人大幅节省案头时间。
 description_zh: >
@@ -91,14 +91,14 @@ metadata:
 
 ## 使用前配置（全自动装配）
 
-🔑 **获取调用密钥**：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-litigation-lawyer-assistant) 免费注册获取 API key（新注用户赠送 500 积分）。
+🔑 **注册后免费创建 API Key**：先打开 [cuecue.cn](https://cuecue.cn/api-key?src=github-litigation-lawyer-assistant) 免费注册账号；登录后进入 API Key 页面，点击「创建 API Key」即可免费生成（新用户注册赠送 500 积分）。
 
-*(获取密钥后，直接将其发送给当前的 AI 助手，并对它说：“**这是我的 key，请帮我配好环境。**” 助手会自动为你拉取底层脚本、写入配置文件，并挂载秒级查法条的 MCP 工具！)*
+*(创建好 Key 后，直接把它发送给当前的 AI 助手，并对它说：“**这是我的 key，请帮我配好环境。**” 助手会自动为你拉取底层脚本、写入配置文件，并挂载秒级查法条的 MCP 工具！)*
 
 - **积分赠送**：新注用户赠送 500 积分，邀请新用户再送 500 积分。
 - **积分不足**：积分用完后，前往 [cuecue.cn/pay](https://cuecue.cn/pay) 页面进行订阅。
 
-> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出创建入口并等待用户提供，**禁止声称"我去创建/查看"**。
 
 ### 配置成功后引导用户跑第一个任务（必须执行）
 
@@ -153,9 +153,10 @@ metadata:
 
 ### Q1 怎么开始使用？密钥从哪来？
 
-1. 前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-litigation-lawyer-assistant) 免费注册，领取 API key（**新注赠送 500 积分**）。
-2. 把 key 直接发给当前 AI 助手，说一句：**“这是我的 key，请帮我配好环境。”**
+1. 前往 [cuecue.cn](https://cuecue.cn/api-key?src=github-litigation-lawyer-assistant) 免费注册账号；登录后在 API Key 页面点击「创建 API Key」，免费创建一个（**新用户赠送 500 积分**）。
+2. 把创建好的 Key 直接发给当前 AI 助手，说一句：**“这是我的 key，请帮我配好环境。”**
 3. 助手会自动写入配置、拉取底层脚本、挂载秒级查法条工具。配置完成后**重启 AI 客户端**即可生效。
+4. 之后**每次开跑前，助手会先自检约 30 秒**（key / 服务 / 搭子三项）——配置有问题会**先告诉你**，不会先扣掉积分再报错。
 
 > 无需自行购买北大法宝等数据库接口，底层已直连。
 
@@ -205,10 +206,12 @@ metadata:
 
 | 现象 | 原因 | 处理方式 |
 |:---|:---|:---|
-| 连接失败/超时 | 网络波动 | 助手会自动重试最多 2 次（10s → 30s 递增），稍候即可 |
-| 提示“积分不足或 key 失效” | 凭据问题 | **按「积分不足专项提示」主动引导**（充值 / 邀请好友得积分 / 等次日免费额度） |
+| 连接失败 / 中途断线 | 网络波动或服务端抖动 | **续跑，不重跑**：已开跑的任务，助手会用**同一个会话**继续取回结果，**不会重新开一次任务**；只有确实没跑起来时才重试（等 10s → 30s） |
+| 断线后自己恢复了 | 助手自动重取 | 看到「已通过 replay 恢复」属正常，**不会重复扣费**，无需再跑 |
+| 提示「积分不足 / key 失效 / 无权限 / 模板不存在」 | 凭据或配置问题 | **不重试**：key 失效 → 本人重新创建；余额不足 → 按「积分不足专项提示」引导；权限或模板问题 → 换搭子 |
 | 结果为空（`RESULT empty`） | 问题过于笼统或背景不足 | 助手会改用通用模式兜底，或请你补充案情背景后重跑 |
 | MCP 法条工具不生效 | 配置未重启 | 重启 AI 客户端；若仍无效，让助手检查配置文件中的 `cue_statute` 节点 |
+| 想先确认环境再开跑 | —— | 助手会在**开跑前先自检约 30 秒**（key / 服务 / 搭子三项），把配置问题拦在扣积分之前 |
 
 > 助手**不会静默吞错**——遇到问题会明确告诉你卡在哪一步。
 
@@ -269,7 +272,32 @@ metadata:
    fi
    ```
 
-**【二】文件处理与上传参数（核心）：**
+**【一·补】跑前健康检查（每次开跑前必做，30 秒）：**
+
+深度任务一次就是积分消耗，**配置错必须拦在开跑之前**，不要等跑挂了才发现（挂了的信号是那一次积分已经花了）。
+
+```bash
+ROOT=$(python3 ~/.cue/cue-skills/cue-research/scripts/cue_api.py root)
+K=$(python3 -c "import json;print(json.load(open('$HOME/.cue/config.json'))['api_key'])" 2>/dev/null || echo "$CUE_API_KEY")
+echo "=== 1/3 API Key ==="; [ -n "$K" ] && echo "已配置（${#K} 位）" || echo "未配置！"
+echo "=== 2/3 Cue 服务 ==="; curl -sS --max-time 10 "https://cuecue.cn/api/health" | python3 -c "import sys,json;print('status =',json.load(sys.stdin).get('status'))" 2>/dev/null || echo "服务不可达（网络/代理/沙箱出站）"
+echo "=== 3/3 搭子在线情况 ==="; curl -sS --max-time 15 "https://cuecue.cn/api/playbook" -H "Authorization: Bearer $K" | python3 -c "
+import sys,json
+want={'template_M3loak':'法律文书审校','template_BFSwVa':'合同风控与合规审查','template_LwdgVW':'疑难法律实操案例库','template_c84pmj':'诉讼文书起草','template_sRdpsI':'法律实务问题研判','template_uJKQlK':'国内法规调研','template_UsZH8W':'法规逐条深度解读','template_jbjaEU':'中外法律对比'}
+sc=json.load(sys.stdin).get('data',{}).get('scenes',[])
+live={b.get('template_id') for s in sc for b in s.get('buddies',[])}
+for t,n in want.items(): print(('  ✅ ' if t in live else '  ⚠️ '),n,t,'' if t in live else '(playbook 未列出)')
+"
+echo "=== root ==="; echo "$ROOT"
+```
+
+| 检查 | 预期 | 不通过怎么办 |
+|:---|:---|:---|
+| API Key | `已配置` | **由用户本人**去 [cuecue.cn](https://cuecue.cn/api-key?src=github-litigation-lawyer-assistant) 注册并创建 API Key 后发来；Agent 不能代创建、也无权查看 |
+| 服务 | `status = healthy` | 等 5 分钟重试；持续不可达 → 查网络 / 代理 / VPN / 沙箱出站（见【四】网络不可达分支） |
+| 搭子 | 目标搭子 `✅` | 显示 `⚠️ (playbook 未列出)` 的搭子**先别直接选**——playbook 只反映**当前账号可见**的搭子，未列出 ≠ 一定不可用，但若真不可用会 404 硬失败且无 replay 可救；不确定时改用「深度研究通用版（留空不传）」 |
+
+> **`⚠️` 不等于不能用，是不确定**：本助手实测 `template_UsZH8W`（法规逐条深度解读）在常查账号的 playbook 里不出现，但网页端 `https://cuecue.cn/?s=template_UsZH8W` 确实可用——说明 playbook 的可见范围可能窄于实际可用范围。**别只凭 playbook 就判定某搭子已下线**，先按 URL 核实或直接试跑一次。
 
 如果用户提供了本地文件（如 docx、pdf 等），不要尝试自己在本地读取文本，请直接使用 runner 脚本原生的 `--material <文件路径>` 参数将文件传给平台处理。
 
@@ -279,10 +307,81 @@ metadata:
 
 **【四】容错与错误提示：**
 
-- **超时与重试**：报连接失败时，自动重试最多 2 次（间隔 10s → 30s 递增）。
-- **凭据错误**：提示“积分不足或 key 失效，请检查”，不要重试。
-- **结果为空**：末行 `RESULT empty` 时改用自由式兜底或请用户补充背景。
-- **禁止静默吞错**：明确向用户转述具体的报错环节。
+深度任务动辄 3～15 分钟，**中途断线是头号现实故障**。核心原则一句话：**断线不等于失败——先续跑，别重跑。**
+
+**1. 断线 / 中途中断 → 用同一个会话续跑（最重要，别做错）**
+
+runner 支持复用已有会话来续跑（`--conversation-id` 参数说明原文：「复用已有 conversation_id 续跑，留空则新建」）。**已经开跑过的任务，一律用原 conv_id 续跑**：
+
+```bash
+python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
+  --query "<原 query>" --template-id <原 template_id> \
+  --conversation-id <已拿到的 conv_id> \
+  --output ~/cue-reports/$(date +%Y-%m-%d-%H%M)-litigation-lawyer.md
+```
+
+> ⚠️ **绝对不要做**：把原命令**原样重发一遍**。那会新建一个 conv_id = **重新开一次完整任务**，前面的时间与积分白花。**只有确实没跑起来（见第 4 条）才重发新命令。**
+
+**conv_id 从哪拿**（按可靠性排序）：
+1. 开跑后 runner 会打印 `[cue-research] conv_id=<ID>, posting chat...`，随即 `[cue-research] STARTED conv_id=<ID>`；
+2. 进度日志文件名就含它：`<root>/logs/cue-run-<conv_id>.log`（`<root>` 由 `python3 .../cue_api.py root` 得到）；
+3. stdout 与日志都丢了，从日志目录捞最后一次：
+   ```bash
+   grep -ho 'conv_id=[^ ,]*' "$(python3 ~/.cue/cue-skills/cue-research/scripts/cue_api.py root)"/logs/*.log | tail -1
+   ```
+
+**2. runner 自带免费自愈——看到这行说明已经救回来了，别重跑**
+
+网络抖动（stream 抛 `OSError` / `ValueError`）时，runner 会**保留已收到的事件**并自动走 replay 重新取回完整报告，**不重复扣费**（源码注释写明 `no credit cost`），并打印：
+
+```
+[cue-research] retrieving via replay <conv_id> (no credit cost)…
+[cue-research] ✓ recovered via replay: <N> chars
+```
+
+看到 `✓ recovered via replay` 就是**成功**，正常交付即可，**不要**再跑一次。
+
+**3. 先分清「可自愈 / 可续跑」与「硬失败」**
+
+| 类型 | 典型信号 | 怎么办 |
+|:---|:---|:---|
+| 可自愈 | 网络抖动、SSE 解析中断（`stream raised OSError/ValueError`） | **什么都不用做**，runner 自动 replay 重取（第 2 条） |
+| 可续跑 | 中途超时 `timeout watching SSE`、进程被杀、客户端断开 | 用**原 conv_id** 续跑（第 1 条） |
+| **硬失败** | 以 `[cue-research] chat_stream failed:` 开头（4xx / 5xx） | **replay 救不了，重跑也没用**。先看紧随其后的 `→ <提示>` 修因，再决定是否重跑 |
+
+runner 会在硬失败时自动打印 `→ {user_hint}`，把状态码翻译成人话：
+
+| 状态 | 含义 | 怎么办 |
+|:---|:---|:---|
+| `status 0` | 网络不可达 | 查 `CUE_API_BASE` 拼写、网络 / VPN / 代理、**沙箱是否禁出站**（常见于受限 mode，需放开） |
+| 401 | key 无效 / 过期 | 让用户本人重新创建 key 并更新 `~/.cue/config.json`，**不重试** |
+| 402 | 余额不足 | 本次调用**没有消耗**；按【四·补】主动引导，**不重试** |
+| 403 | 无权限（模板属他人 / 权限被收回） | **不重试**，换搭子 |
+| 404 | template_id 错或已删除 | **不重试**，回【五】核对 template_id |
+| 422 | 文件被拒（格式 / 大小超限） | 换受支持格式或拆分重传（见 `/api/file_server/accept_type`） |
+| 429 | 被限流 | 等 30 秒后重试，属可重试 |
+| 5xx | 服务端临时故障 | 稍候重试，属可重试 |
+
+**4. 重试只留给「根本没跑起来」的情况**
+
+runner **自身没有任何重试逻辑**（不会自动重试），所以重试是 Agent 的事，且**仅在还没拿到 conv_id 时**才做（`status 0` / 429 / 5xx）。间隔 10s → 30s 递增，最多 2 次：
+
+```bash
+for i in 1 2; do
+  python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
+    --query "<原 query>" --template-id <原 template_id> \
+    --output ~/cue-reports/$(date +%Y-%m-%d-%H%M)-litigation-lawyer.md && break
+  sleep $(( i * 20 - 10 ))   # 10s → 30s
+done
+```
+
+**已拿到 conv_id 的，一律走第 1 条续跑，不要走进这个重试循环。**
+
+**5. 结果为空（`RESULT empty`）**：末行 `RESULT empty` 时改用**自由式兜底**（跑 runner 但**不带** `--template-id`，且按轨道 A 的降级规则先 rewrite），或请用户补充案情背景后重跑；不要硬凑。
+
+**6. 超时口径**：`--timeout` 默认 **3600s（60 分钟，对齐服务端硬超时）**，而单次深研通常 3～15 分钟。超过 timeout 会打印 `timeout watching SSE`，按**断线**处理（第 1 条续跑），不要当失败。
+
+**7. 禁止静默吞错**：明确向用户转述**卡在哪一步**——不要只说「出错了」，也不要把硬失败说成「网络问题」。
 
 **【四·补】积分不足专项提示（必须执行）：**
 
@@ -301,13 +400,15 @@ metadata:
 
 | 顺序 | 动作指令 |
 | :--- | :--- |
+| 0 | **跑前健康检查（见【一·补】）**：key / 服务 / 搭子三项，约 30 秒——配置错必须拦在扣积分之前 |
 | 1 | **先按「用户交的是什么材料」分流**（见下方材料分流表），再按下表语义匹配选搭子（禁止仅凭话题关键词盲配） |
 | 2 | 提示耗费积分并等确认：「将跑该问题，需耗 credits，是否继续？」 |
 | 3 | 进行 3-15 分钟预期管理，随后阻塞执行 |
 | 4 | 读末行 `RESULT ok`，原样交付报告并提供本地 md 文件路径 |
 | 5 | 交付后**主动询问**：「是否需要我将其另存为可编辑的 Word (.docx) 格式？」用户确认后再转换 |
 | 6 | 交付时**同时附带 Cue 原始报告链接**（禁止编造链接） |
-| 7 | 遇 `INSUFFICIENT_CREDITS` 主动提示邀请链接（禁止只丢错误码） |
+| 7 | **断线 / 超时 → 用原 `conv_id` 续跑**（见【四】第 1 条），**不要原样重发新命令**（会新建任务、重复扣费） |
+| 8 | 遇 `INSUFFICIENT_CREDITS` 主动提示邀请链接（禁止只丢错误码） |
 
 > ⚠️ **先退一步：单条法规的查询/核查根本不该走到这一步。** 用户只要某部法规或某条法条的原文、内容、效力（是否有效、是否被修订废止），那是【零】里的**轨道 A**——直接调 `cue_statute` MCP，别在这里挑搭子。MCP 没查到，降级用**自由式深研（不带 `--template-id`）**，**不要**退而选「法律实务问题研判」。
 

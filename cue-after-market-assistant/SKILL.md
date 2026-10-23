@@ -3,7 +3,7 @@ name: cue-after-market-assistant
 displayName: 盘后超级助理
 description: 用 Cue 通常 5-10 分钟（最长约 15 分钟）自动生成深度市场复盘报告——穿透涨跌逻辑与资金流向，帮你快速看懂今天市场发生了什么、自己的持仓受了什么影响、明天该盯哪些信号；还能指定板块，深挖你关注的那条主线。只做大盘/板块层面的复盘，不分析单只个股（个股请用「短线走势与技术面分析」）。
 description_zh: Cue 盘后超级助理：通常 5-10 分钟、最长约 15 分钟生成深度复盘，看懂涨跌原因、资金动向、持仓影响、次日关注；可指定板块，深挖你关注的主线（仅市场层面，不分析单只个股）。
-version: 1.5.1
+version: 1.5.2
 author: sensedeal
 tags: [cue, after-market, market-recap, 盘后复盘, 市场复盘, 收盘分析, 个人投资, 持仓检视, 可视化, 看板, dashboard]
 ---
@@ -197,7 +197,7 @@ python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-after-market-assistant) 注册获取。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-after-market-assistant) 注册后免费创建。
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 

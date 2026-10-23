@@ -3,7 +3,7 @@ name: youtube-deep-dive
 displayName: YouTube 视频深度解析
 description: 输入一个 YouTube 视频链接，输出**带时间戳**的完整文字稿——口播 ASR（区分说话人）+ 关键帧画面文字与视觉要点——并附一份深度总结分析（主旨、结构大纲、核心要点、金句、提到的书/人名/数据/工具）。底层经 Cue Omni Reader 远程端点解析（ASR + 关键帧视觉理解，自动绕过平台反爬），再由大模型整理概括交付。
 description_zh: Cue YouTube 视频深度解析：链接直达，带时间戳的口播+画面双轨文字稿 + 深度总结分析。
-version: 1.0.1
+version: 1.0.2
 author: sensedeal
 tags: [cue, youtube, 视频解析, 视频转文字, 转文字, 字幕, 转录, 摘要, 说话人分离, 视觉理解, multimodal, omni-reader]
 ---
@@ -38,7 +38,7 @@ tags: [cue, youtube, 视频解析, 视频转文字, 转文字, 字幕, 转录, �
 
 ## 前置依赖（新用户首次使用只需做这一件事）
 
-- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。获取：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-youtube-deep-dive)（新账号送 500 积分 + 每天 10 免费积分）。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。
+- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-youtube-deep-dive)（新账号送 500 积分 + 每天 10 免费积分）。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。
 
   ```bash
   export CUE_API_KEY="sk你的key"

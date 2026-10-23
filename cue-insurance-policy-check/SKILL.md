@@ -2,7 +2,7 @@
 name: cue-insurance-policy-check
 description: 用 Cue 逐条核验保险产品的保障责任、责任免除、等待期、费率与退保损失——与同类产品客观对比，产出一份可向客户如实说明的条款理解底稿。
 description_zh: Cue 保险产品条款核查：逐条核验保障/免责/等待期/费率/退保条款，产出可如实说明的理解底稿。
-version: 1.1.0
+version: 1.1.1
 author: sensedeal
 tags: [cue, insurance, policy-check, product-analysis, 保险, 条款核查, 产品对比, 合规营销]
 ---
@@ -108,7 +108,7 @@ fi
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-insurance-policy-check) 注册获取。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-insurance-policy-check) 注册后免费创建。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
 

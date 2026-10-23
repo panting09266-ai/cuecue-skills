@@ -3,7 +3,7 @@ name: cue-omni-reader
 displayName: Omni Reader 多模态文件解析
 description: 输入URL或上传文件（PDF/Office/图片/扫描件/音视频/网页/压缩包等不限定文件格式），将任意文档/文件/网页内容解析为Markdown，即插即用、默认不落盘，具有极高隐私保护。可精准还原文档目录结构和复杂表格结构，适用于高精度高性能要求的文档处理OCR任务；可将音视频内容一键解析转化为文字稿，并具备画面视觉理解能力，适用于视频转脚本、主流视频网站url提取ppt等场景。
 description_zh: Cue Omni Reader：视频多模态理解、视觉理解、文档解析，PDF/Office/图片/扫描件/音视频/网页/压缩包转 Markdown。
-version: 1.8.6
+version: 1.8.7
 author: sensedeal
 tags: [cue, omni-reader, video-understanding, vision, multimodal, ocr, document-parsing, mcp, 视频解析, 视觉理解, 多模态, 文档解析, OCR]
 ---
@@ -259,7 +259,7 @@ Omni MCP 返回结构化错误，包含 `code`（错误码）、`failure_scope`�
 
 ## 环境要求
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-omni-reader) 注册获取，复用通用 Cue Key，无需创建 Omni 专用 Key。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-omni-reader) 注册后免费创建，复用通用 Cue Key，无需创建 Omni 专用 Key。
 
 免费额度：新用户注册一次性 500 积分赠礼 + 每天 10 免费积分；邀请好友加入再送500积分赠礼。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。详见「积分不足专项提示」。
 

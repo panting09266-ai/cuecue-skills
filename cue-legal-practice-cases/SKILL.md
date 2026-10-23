@@ -2,7 +2,7 @@
 name: cue-legal-practice-cases
 slug: cue-legal-practice-cases
 displayName: 疑难法律实操案例库
-version: 1.2.0
+version: 1.2.2
 description: >
   疑难法律实操案例库 — 遇到民事、刑事纠纷拿不准怎么办？围绕你的争议点检索公开裁判文书、监管问答与实务案例，看同类案子法院怎么判、赔多少、争议焦点在哪。普通人预判官司胜算，律师办案更快更有据。
   Triggers: 疑难法律、实操案例、裁判口径、类案检索、裁判规则、实务案例、争议焦点、法律实操、监管问答、判例检索、离婚、继承、劳动仲裁、借贷纠纷、交通事故、刑事辩护、legal practice cases
@@ -121,27 +121,31 @@ https://cuecue.cn/share/<conv_id>
 
 ## 环境要求
 
-**首次使用运行 skill 自带的一键安装脚本**（检查依赖 → 克隆 runner → 验证 Key → 测试连通性）：
-
-```bash
-```
+依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 
-首次使用需安装 Runner（幂等，已装则拉取更新）：
+**首次使用需安装 Runner**（幂等，已装则拉取更新）。`~/.cue/cue-skills` 只是依赖代码副本，你的报告、日志、Key 都不在里面，可随时重装：
 
 ```bash
+# 1) 拉取 / 更新 runner：GitHub 不通自动走 Gitee 镜像
 if [ -d ~/.cue/cue-skills/.git ]; then
-  git -C ~/.cue/cue-skills pull --ff-only
+  git -C ~/.cue/cue-skills pull --ff-only \
+    || { echo "增量更新失败，改用镜像重取"; \
+         git -C ~/.cue/cue-skills fetch --all && git -C ~/.cue/cue-skills reset --hard origin/main; }
 else
   git clone https://github.com/sensedeal/cue-skills ~/.cue/cue-skills \
     || git clone https://gitee.com/sensedeal/cue-skills ~/.cue/cue-skills
 fi
+
+# 2) 自检：装完立刻确认 runner 能启动（打印出 usage 才算装好）
+python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py --help >/dev/null 2>&1 \
+  && echo "runner 就绪 ✅" || echo "runner 不可用 ❌ 见「脚本装不上 / 跑不起来」"
 ```
 
-依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
+> **两条路都失败**（断网、或公司网络同时拦了 GitHub 与 Gitee）时：**不要反复重试**。直接告诉用户「暂时装不上检索引擎，是网络限制，不是你操作的问题」，并给出「降级方案」里的公开查询入口，等网络恢复再装。
 
-Cue API Key：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-legal-practice-cases) 注册获取，新账号送 500 积分 + 每天 10 积分。写入 `~/.cue/config.json`：
+Cue API Key：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-legal-practice-cases) 注册后免费创建，新账号送 500 积分 + 每天 10 积分。写入 `~/.cue/config.json`：
 
 ```bash
 mkdir -p ~/.cue
@@ -251,15 +255,35 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 ### 错误速查
 
-| 现象 | 原因 | 怎么修 |
-|------|------|--------|
-| 401 / Key 无效 | Key 过期或写错 | 由用户本人重新生成 Key，更新 `~/.cue/config.json` |
-| 超时 >30s | 服务维护/过载 | 等 5 分钟，跑诊断；当天内重试 |
-| 搭子不可用 | 临时下线 | 网页端直接跑，或等 1 小时 |
-| 积分不足 | 余额 < 消耗 | **按「积分不足专项提示」主动引导**（充值 / 邀请好友得积分 / 等次日免费额度） |
-| 中途中断 | 队列满/数据源波动 | **不换 prompt**，相同命令续接 |
-| `RESULT empty` | 公开源无匹配 | 缩小范围（案由/法院层级），换关键词 |
-| config.json 报错 | JSON 格式不对 | `{"api_key": "sk..."}` 无多余逗号 |
+**总则（必须先做）**：任何报错都**不要**把英文原文、堆栈或错误码直接丢给用户。一律按「**出了什么事（说人话）→ 你现在做什么（一步）**」两句输出；技术细节留在自己的排查里——用户看不懂，就等于没提示。
+
+| 你会看到什么 | 说人话是什么意思 | 你现在做什么 |
+|------|------|------|
+| `401` / `API key 无效或已过期` | 你的 Cue Key 过期了或填错了 | 让**用户本人**去 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-legal-practice-cases) 重新生成，更新 `~/.cue/config.json` 后重跑（Agent 不能代生成、也无权查看） |
+| `网络不可达` / clone、curl 卡住或超时 | 连不上 Cue，或网络拦了 GitHub/Gitee | 先确认能打开 cuecue.cn；Runner 装不上就按「脚本装不上 / 跑不起来」处理，**别反复重试** |
+| `402` / 余额不足 / `INSUFFICIENT_CREDITS` | 积分不够跑这一次 | **按「积分不足专项提示」主动引导**（邀请好友得积分 / 充值 / 等次日免费额度）；**不要重试** |
+| `403` 权限不足 | 这个搭子不属于当前账号，或权限被收回 | 换用账号自有的搭子，或让用户在网页端跑 |
+| `429` / 调用过于频繁 | 短时间内发太多了 | 等 30 秒，用**完全相同的命令**重跑一次 |
+| `5xx` / 服务端临时故障 | Cue 服务端在维护或过载 | 等 5 分钟再试；持续出现就告诉用户「是服务端问题，稍后再试」并给降级入口 |
+| 健康检查超时 >30s | 服务忙（研究本身就要 3-15 分钟） | 健康检查超时就等 5 分钟；**研究没到 15 分钟不算失败**，等 runner 出 `RESULT` 再判 |
+| 搭子找不到 / `暂不可用` | 搭子临时下线 | 让用户在网页端直接跑，或等 1 小时 |
+| 中途中断（输出戛然而止） | 队列满或数据源波动 | **不换 prompt、不删 `~/.cue/session/task`**，用相同命令续接 |
+| `RESULT empty` | 公开源里没有匹配的判例 | 换更常见的案由或关键词、缩窄范围后重跑 |
+| 昨天还能跑，今天报参数错/脚本报错 | Runner 更新引入了变化，或本地是旧版 | 先更新 Runner（含镜像兜底）；仍不行就回退版本，见「脚本装不上 / 跑不起来」 |
+| `config.json 报错` | 配置文件格式不对 | 应为 `{"api_key": "sk..."}`，检查有没有多余逗号 |
+
+### 脚本装不上 / 跑不起来
+
+Runner 是**外部下载的代码**，最常见的两类问题是**网络取不到**和**更新后跑不动**。按顺序试，不要跳步：
+
+| 第几档 | 什么时候用 | 怎么做 |
+|------|------|------|
+| 1. 重取 | 网络抖动、clone / pull 报错 | 重跑「环境要求」里的安装命令（已带 GitHub → Gitee 镜像兜底），再跑那行自检 |
+| 2. 修好本地副本 | 目录在，但 `pull` 失败或代码半损 | `git -C ~/.cue/cue-skills fetch --all && git -C ~/.cue/cue-skills reset --hard origin/main` |
+| 3. 回退版本 | 更新后突然跑不动（参数变了、报错） | `git -C ~/.cue/cue-skills log --oneline -10` 找到上一个能用的提交 → `git -C ~/.cue/cue-skills checkout <commit>`；想恢复最新：`git -C ~/.cue/cue-skills checkout main && git -C ~/.cue/cue-skills pull --ff-only` |
+
+- 报告和日志落在 `~/.cue/reports`、`~/.cue/logs`，**不在** runner 目录里，所以第 2、3 档不会弄丢你的报告或 Key。
+- 三档都无效（断网、或公司网络同时拦了 GitHub 和 Gitee）：如实告诉用户「检索引擎暂时装不上/修不好，是网络或脚本问题，不是你操作的问题」，并给出「降级方案」里的公开查询入口。
 
 ### 积分不足专项提示（必须执行）
 
@@ -278,6 +302,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 ```
 出问题？
+├─ Runner 装不上/跑不动 → 见「脚本装不上 / 跑不起来」三档修复
 ├─ Key 报错 → 由用户本人重新生成 → 更新 config.json → 重试
 ├─ 连不上 → curl /api/health 确认 → 检查 DNS/代理
 ├─ 搭子找不到 → curl /api/playbook → 等或用网页端
