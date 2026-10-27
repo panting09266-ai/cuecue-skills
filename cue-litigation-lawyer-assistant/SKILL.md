@@ -3,7 +3,7 @@ name: cue-litigation-lawyer-assistant
 display_name: 诉讼律师全能助手（专业版·不限国内）
 display_name_en: Litigation Lawyer All-in-One Assistant (Pro · Global)
 displayName: 诉讼律师全能助手（专业版·不限国内）
-version: 1.8.1
+version: 1.8.2
 description: >
   专为从事民商事及刑事诉讼的执业律师、法务打造的 AI 案头助手。将繁琐的“查、核、算、写”工作交由 AI 处理——支持秒级调用 MCP 检索现行法规原文；更支持深度研判：合同审查、疑难案件类案检索、复杂赔偿金/诉讼费自动理算、诉讼文书高质量起草与仿写、深度文书审校（自动核验法条效力与案号真伪）。直连北大法宝等权威法律数据库，产出结论均附原始链接，助力法律人大幅节省案头时间。
 description_zh: >
@@ -91,14 +91,14 @@ metadata:
 
 ## 使用前配置（全自动装配）
 
-🔑 **注册后免费创建 API Key**：先打开 [cuecue.cn](https://cuecue.cn/api-key?src=github-litigation-lawyer-assistant) 免费注册账号；登录后进入 API Key 页面，点击「创建 API Key」即可免费生成（新用户注册赠送 500 积分）。
+🔑 **注册后免费创建 API Key**：先打开 [cuecue.cn](https://cuecue.cn/api-key?src=github-litigation-lawyer-assistant) 免费注册账号；登录后进入 API Key 页面，点击「创建 API Key」即可免费生成（新用户注册赠送 500 积分）。生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。
 
 *(创建好 Key 后，直接把它发送给当前的 AI 助手，并对它说：“**这是我的 key，请帮我配好环境。**” 助手会自动为你拉取底层脚本、写入配置文件，并挂载秒级查法条的 MCP 工具！)*
 
 - **积分赠送**：新注用户赠送 500 积分，邀请新用户再送 500 积分。
 - **积分不足**：积分用完后，前往 [cuecue.cn/pay](https://cuecue.cn/pay) 页面进行订阅。
 
-> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出创建入口并等待用户提供，**禁止声称"我去创建/查看"**。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 
 ### 配置成功后引导用户跑第一个任务（必须执行）
 

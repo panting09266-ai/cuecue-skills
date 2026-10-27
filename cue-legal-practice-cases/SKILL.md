@@ -2,7 +2,7 @@
 name: cue-legal-practice-cases
 slug: cue-legal-practice-cases
 displayName: 疑难法律实操案例库
-version: 1.2.2
+version: 1.2.3
 description: >
   疑难法律实操案例库 — 遇到民事、刑事纠纷拿不准怎么办？围绕你的争议点检索公开裁判文书、监管问答与实务案例，看同类案子法院怎么判、赔多少、争议焦点在哪。普通人预判官司胜算，律师办案更快更有据。
   Triggers: 疑难法律、实操案例、裁判口径、类案检索、裁判规则、实务案例、争议焦点、法律实操、监管问答、判例检索、离婚、继承、劳动仲裁、借贷纠纷、交通事故、刑事辩护、legal practice cases
@@ -145,7 +145,7 @@ python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py --help >/dev/null
 
 > **两条路都失败**（断网、或公司网络同时拦了 GitHub 与 Gitee）时：**不要反复重试**。直接告诉用户「暂时装不上检索引擎，是网络限制，不是你操作的问题」，并给出「降级方案」里的公开查询入口，等网络恢复再装。
 
-Cue API Key：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-legal-practice-cases) 注册后免费创建，新账号送 500 积分 + 每天 10 积分。写入 `~/.cue/config.json`：
+Cue API Key：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-legal-practice-cases) 注册后免费创建，新账号送 500 积分 + 每天 10 积分。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。写入 `~/.cue/config.json`：
 
 ```bash
 mkdir -p ~/.cue
@@ -154,7 +154,7 @@ echo '{"api_key": "sk你的key"}' > ~/.cue/config.json
 
 单次研究消耗约 3-8 credits。
 
-> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 
 ---
 
@@ -212,7 +212,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-legal-practice-cases) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-legal-practice-cases) 生成后点「复制」并粘贴发送给您正在使用的智能体，再由 Agent 写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源（含北大法宝等） | Cue 运维 | Cue 用缓存兜底，标注"来源暂不可达"；**你无需自行接入或申请** |
 
@@ -231,7 +231,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-legal-practice-cases) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-legal-practice-cases) 生成后点「复制」并粘贴发送给您正在使用的智能体（Agent 无法代生成，也无权查看） |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 

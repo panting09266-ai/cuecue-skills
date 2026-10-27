@@ -3,7 +3,7 @@ slug: podcast-deep-dive
 name: 播客深度提取转文字
 description: 输入一期播客（小宇宙、喜马拉雅）链接，输出**带时间戳、区分说话人**的完整文字稿，并附一份深度总结分析（主旨、结构大纲、分人对谈要点、金句、提及的书/人名/数据）。底层经 Cue Omni Reader 远程端点解析（ASR + 说话人分离，自动绕过平台反爬），再由大模型按播客场景加工交付。
 description_zh: Cue 播客深度提取：小宇宙/喜马拉雅单集链接直达，带时间戳分说话人转写稿 + 深度总结分析。
-version: 1.0.1
+version: 1.0.2
 author: sensedeal
 tags: [cue, podcast, 播客, 小宇宙, 喜马拉雅, 转文字, 转录, 摘要, 说话人分离, audio, asr, omni-reader]
 ---
@@ -37,7 +37,7 @@ tags: [cue, podcast, 播客, 小宇宙, 喜马拉雅, 转文字, 转录, 摘要,
 
 ## 前置依赖（新用户首次使用只需做这一件事）
 
-- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-podcast-deep-dive)（新账号送 500 积分 + 每天 10 免费积分）。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。
+- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-podcast-deep-dive)（新账号送 500 积分 + 每天 10 免费积分）。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。
 
   ```bash
   export CUE_API_KEY="sk你的key"
@@ -53,9 +53,9 @@ tags: [cue, podcast, 播客, 小宇宙, 喜马拉雅, 转文字, 转录, 摘要,
 > 检测到未配置或失效时，**必须主动把下面三步说全**：
 >
 > > 这个技能要一把 Cue API Key 才能跑，三步就好：
-> > 1. 打开 **[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-podcast-deep-dive)**，登录后创建一把 Key（新账号送 500 积分 + 每天 10 免费积分）
+> > 1. 打开 **[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-podcast-deep-dive)**，登录后点击「创建 API Key」（新账号送 500 积分 + 每天 10 免费积分）
 > > 2. 把 Key **完整复制**下来
-> > 3. **直接粘贴发给我**，我帮你写进配置，然后马上就能跑
+> > 3. **一定要点击「复制」，再粘贴发给我**，我帮你写进配置，然后马上就能跑
 >
 > **Key 纪律**：只在用户本机写入，**禁止回显到对话、日志或任何文件示例中**；用户若把 Key 贴在了对话里，提醒他可以去 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-podcast-deep-dive) 轮换一把。
 
@@ -77,7 +77,7 @@ echo "=== 3/3 curl ===" && { command -v curl >/dev/null && echo "就绪" || echo
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-podcast-deep-dive) 生成后**复制发给你**（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-podcast-deep-dive) 生成后**点「复制」并粘贴发送给您正在使用的智能体**（Agent 无法代生成，也无权查看） |
 | 远程端点 | `已连接（3 工具）` | 等 5 分钟重试；仍不通查网络/DNS；报 `Authentication required` = Key 没带上或已失效 |
 | curl | `就绪` | 系统一般自带；缺失时用 `python3` + `urllib` 做等价请求 |
 

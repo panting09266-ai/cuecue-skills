@@ -4,7 +4,7 @@ name: cue-ashare-research-expert
 Name: A股投资研究专家
 description: 用 Cue 一站式做 A 股投资研究——盘前找机会、盘中看主线、盘后做复盘，再到行业赛道与产业链挖股，以及个股估值/财报/技术面。全面覆盖散户的炒股路径，不论是掌握盘面节奏、还是找行业赛道、或是选股盯票，无需连接第三方金融数据库，已覆盖同花顺、toshare、东方财富、交易所网站等各大权威数据。
 description_zh: Cue A股投资研究专家：11 个专业搭子按你的问题自动路由，覆盖盘前/盘中/盘后、个股估值·财报·技术面、行业赛道与产业链挖股，一个 skill 打通 A 股投研全流程。
-version: 1.0.1
+version: 1.0.2
 author: sensedeal
 tags: [cue, a-share, equity-research, 投资研究, A股, 投研, 个股分析, 行业研究, 盘前, 复盘, 估值, 财报]
 ---
@@ -174,12 +174,12 @@ curl -sS --max-time 10 "https://cuecue.cn/api/templates" \
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-ashare-research-expert) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-ashare-research-expert) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。
 
 - **积分赠送**：新注用户赠送 500 积分，邀请新用户再送 500 积分。
 - **积分不足**：积分用完后，前往 [cuecue.cn/pay](https://cuecue.cn/pay) 页面进行订阅。
 
-> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 
 ---
 

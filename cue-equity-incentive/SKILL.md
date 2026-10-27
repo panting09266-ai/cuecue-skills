@@ -4,7 +4,7 @@ name: cue-equity-incentive
 Name: 股权激励查询
 description: 用 Cue 查询和分析上市公司股权激励计划与股份回购——基于市面上最全的股权激励数据库（2015年至今10年+历史覆盖），独家特有数据源。查单个计划或要素、或一次多家公司的同类要素，可直连 Cue 数据接口秒级返回；单家公司的方案设计、实施效果、同行对比，以及全市场方案盘点与趋势分析，则生成深度报告（后者走自由式深研），用真实数据评估激励方案的竞争力与合理性。
 description_zh: Cue 股权激励查询：独家最全股权激励数据库（2015年至今10年+）；单个计划/要素、多公司批量要素秒级直查；单家公司方案设计/效果评估/同行对比走股权激励搭子，全市场方案盘点与趋势分析走自由式深研；另覆盖股份回购数据。
-version: 1.5.1
+version: 1.5.2
 author: sensedeal
 tags: [cue, equity-incentive, ESOP, 股权激励, 激励方案, 市值管理, 高管激励, 股份回购, buyback]
 ---
@@ -227,9 +227,9 @@ fi
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-equity-incentive) 注册后免费创建。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-equity-incentive) 注册后免费创建。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。
 
-> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 
 ---
 
@@ -419,7 +419,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-equity-incentive) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看）。**三条轨道共用同一个 Key**——MCP 配置里的 `Bearer <your-key>` 就是它 |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-equity-incentive) 生成后点「复制」并粘贴发送给您正在使用的智能体，再由 Agent 写入 ~/.cue/config.json（Agent 不能代生成，也无权查看）。**三条轨道共用同一个 Key**——MCP 配置里的 `Bearer <your-key>` 就是它 |
 | MCP 端点（轨道 A） | Cue 运维 | 匿名拉 `https://cuecue.cn/api/mcp-catalog` 看该域 `external_status`；`live` 才可用 |
 | Cue 服务端（轨道 B / C） | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源 | 公开网站 | Cue 用缓存兜底，标注"来源暂不可达" |
@@ -439,7 +439,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-equity-incentive) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-equity-incentive) 生成后点「复制」并粘贴发送给您正在使用的智能体（Agent 无法代生成，也无权查看） |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 

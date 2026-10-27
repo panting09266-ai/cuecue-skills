@@ -3,7 +3,7 @@ name: douyin-video-studio
 displayName: 抖音短视频全解析
 description: 抖音短视频一站式解析与创作工场。用户直接输入抖音视频链接加一句简单要求即可：视频转文字（字幕/口播/画面内容）、内容分析总结、爆款视频拆解（按带货/流量逻辑拆结构分段、脚本类型、爆款归因、六维评分报告，照着学照着抄）、视频转脚本（镜头/运镜/转场/情绪/时间线/屏幕文字）、爆款脚本生成（原骨架改写成你的脚本，或按方向/目的/商品原创口播脚本，含分段表与六维质检评分）、视频提示词反推（画面和内容转成 agent 可理解的提示词）。底层经 Cue Omni Reader 远程端点解析（自动绕过抖音反爬），再由大模型按场景加工交付。
 description_zh: 抖音短视频全解析：链接直达，转文字/分析总结/爆款拆解六维评分/转脚本/脚本生成/提示词反推，六大场景全覆盖。
-version: 1.2.1
+version: 1.2.2
 author: sensedeal
 tags: [douyin, 抖音, video, 短视频, 爆款拆解, 脚本生成, 视频转文字, 提示词反推, 内容创作, 带货, 口播, 影视解说, omni-reader]
 ---
@@ -43,7 +43,7 @@ tags: [douyin, 抖音, video, 短视频, 爆款拆解, 脚本生成, 视频转�
 
 ## 前置依赖（新用户首次使用只需做这一件事）
 
-- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-douyin-video-studio)（新账号送 500 积分 + 每天 10 免费积分）。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。详见「积分不足专项提示」。推荐用环境变量传入，避免明文写盘：
+- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-douyin-video-studio)（新账号送 500 积分 + 每天 10 免费积分）。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。详见「积分不足专项提示」。推荐用环境变量传入，避免明文写盘：
 
   ```bash
   export CUE_API_KEY="sk你的key"
@@ -60,9 +60,9 @@ tags: [douyin, 抖音, video, 短视频, 爆款拆解, 脚本生成, 视频转�
 > 检测到未配置或失效时，**必须主动把下面三步说全**（照这个话术说，别只丢一句"请提供 API Key"）：
 >
 > > 这个技能要一把 Cue API Key 才能跑，三步就好：
-> > 1. 打开 **[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-douyin-video-studio)**，登录后创建一把 Key（新账号送 500 积分 + 每天 10 免费积分）
+> > 1. 打开 **[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-douyin-video-studio)**，登录后点击「创建 API Key」（新账号送 500 积分 + 每天 10 免费积分）
 > > 2. 把 Key **完整复制**下来
-> > 3. **直接粘贴发给我**，我帮你写进配置，然后马上就能跑
+> > 3. **一定要点击「复制」，再粘贴发给我**，我帮你写进配置，然后马上就能跑
 >
 > 用户发来 Key 后，Agent 负责写入 `~/.cue/config.json`（格式 `{"api_key": "sk..."}`），写完即可重跑，无需重启客户端。
 >
@@ -86,7 +86,7 @@ echo "=== 3/3 curl ===" && { command -v curl >/dev/null && echo "就绪" || echo
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-douyin-video-studio) 生成后**复制发给你**（Agent 无法代生成，也无权查看）；话术见上方引用块 |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-douyin-video-studio) 生成后**点「复制」并粘贴发送给您正在使用的智能体**（Agent 无法代生成，也无权查看）；话术见上方引用块 |
 | 远程端点 | `已连接（3 工具）` | 等 5 分钟重试；仍不通查网络/DNS，或走「降级方案」；报 `Authentication required` = Key 没带上或已失效 |
 | curl | `就绪` | 系统一般自带；缺失时用 `python3` + `urllib` 带浏览器 UA 做等价重定向跟随（见步骤 0） |
 

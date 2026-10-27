@@ -2,7 +2,7 @@
 name: catalyst-calendar
 displayName: 持仓催化剂日历追踪
 slug: cue-catalyst-calendar
-version: "0.1.21"
+version: "0.1.22"
 summary: "把持仓未来几个月「确定会发生」的日子排成一张表——财报、解禁、股东会，每个日期都能点回一条公告或一条法条。只报日子不评涨跌；例行琐事（补选独董之类）不占版面；排完还能设当日提醒（深度研究须先获授权）。"
 description: "帮个人投资者把持仓未来几个月要盯的日子排成一张表——业绩披露、解禁、股东大会等，每个日期都能回指公告或法条，只报日子不评涨跌。技术面：给你持仓列表 + 时间窗，产出按日期排的盯盘日历：每条事件的日期要么已有披露在场且含明确 YYYY-MM-DD，要么 statute 原文推导且适用条件在锚内可判；未披露的推测事件、任何日期算术都进不了表。机检对评级词与褒贬零容忍（词族以机检现值为准，本文所举为常见例）；豁免只有两条口径：类型列整列不扫、官方披露词组按词形豁免。适合：财报季前置、组合盯盘节奏、投研会材料。不适合：涨跌与择时建议、事件影响判断（本件只陈述不判断，也没有留白判断位）。 排完日历后主动提出按日历设当日提醒，事件发生后提醒并可（经用户授权）跑 Cue 深度研究，报告与日历分开交付、不回填。 Do NOT use for: trade timing, impact calls, rumour-sourced events."
 tags: [投研, 事件日历, A股, 催化剂]
@@ -232,7 +232,8 @@ echo "=== 检查3 Cue 服务 ===" && curl -sS --max-time 10 "https://cuecue.cn/a
 
 **第 2 步 · 新用户开通道 —— 三步**（口径以 `cue-deep-research` 现值为准，不抄死）：
 
-- ① **注册后免费创建 Key** —— [cuecue.cn/api-key](https://cuecue.cn/api-key?src=github-catalyst-calendar) 免费注册账号后点击「创建 API Key」。计费事实只转述服务端口径：新账号送免费积分、每天再免费送 10 分，**实际扣数以服务端返回为准**（同铁律 5，本文不报死数）。
+- ① **注册后免费创建 Key** —— [cuecue.cn/api-key](https://cuecue.cn/api-key?src=github-catalyst-calendar) 免费注册账号后点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。计费事实只转述服务端口径：新账号送免费积分、每天再免费送 10 分，**实际扣数以服务端返回为准**（同铁律 5，本文不报死数）。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 - ② **装 runner** —— 跑 `cue-deep-research` 自带的一键安装脚本 `bash setup.sh`（检查依赖 → 克隆 runner → 验证 Key → 测试连通性；内置 GitHub / Gitee 双源自动切换）。依赖仅 `git` + `python3` + `curl`，Python 只用标准库。装完 runner 落在 `~/.cue/cue-skills/cue-research/scripts/research_run.py`。
 - ③ **验证** —— 重跑第 1 步预检，三项全绿才算开通道完成。
 

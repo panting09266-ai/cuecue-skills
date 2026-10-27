@@ -4,7 +4,7 @@ name: cue-supply-chain-mining
 displayName: 产业链潜力股挖掘
 description: 一句话：输入一条产业链（人形机器人、AI 算力、固态电池、光伏……），Cue自动画出上中下游结构，找出每个环节里市占率高但还没被市场充分关注的"隐形冠军"，分析景气从哪个环节来、往哪个环节传导、谁的弹性最大。 对个人投资者的场景化价值： - 追热点不追在高位：一个新概念出来（比如人形机器人），所有人都在追那两家龙头。你用本搭子 5分钟拿到整条链的图谱，发现做谐波减速器、六维力传感器的那几家小公司，才是真正有业绩弹性的。 - 找龙头替代品：宁德时代太贵、比亚迪买不起。输入"新能源车产业链"，Cue帮你找到电池结构件、热管理、高压连接器这些细分环节里，基本面扎实、估值只有龙头一半的标的。 - 建立自己的研究框架：每次投一个新赛道，先用本搭子跑一遍产业链全景，形成自己的认知地图。长期积累下来，你对不同产业链的理解会比 90% 的散户深。 输出什么样： 产业链图谱（上中下游完整结构）→ 传导逻辑（景气从哪来、往哪去）→ 隐形冠军清单（细分龙头、高市占率、低关注度）→ 弹性评估（业绩弹性、估值弹性、事件弹性）→风险提示 → 每条结论附带公告/来源链接。 关联搭子使用： 找到一个"隐形冠军"只是第一步，验证它值不值得投还需要以下搭子配合：个股分析与基本面评估、上市公司财报分析、个股短线走势与技术面分析、企业全景画像等。
 description_zh: Cue 产业链潜力股挖掘：沿产业链传导路径，挖掘基本面扎实的隐形冠军。
-version: 1.2.1
+version: 1.2.2
 author: sensedeal
 tags: [cue, supply-chain, stock-mining, 产业链, 潜力股, 隐形冠军, 传导逻辑]
 ---
@@ -197,11 +197,11 @@ fi
 
 依赖：`git` + `python3` + `curl`（macOS 自带，Linux `apt install git python3 curl`）。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-supply-chain-mining) 注册后免费创建。新用户注册一次性送 500 积分，之后每天再免费送 10 积分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-supply-chain-mining) 注册后免费创建。新用户注册一次性送 500 积分，之后每天再免费送 10 积分。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。
 
 积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。详见下方「积分不足专项提示」。
 
-> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 
 ---
 
@@ -251,7 +251,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-supply-chain-mining) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-supply-chain-mining) 生成后点「复制」并粘贴发送给您正在使用的智能体，再由 Agent 写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源 | 公开网站 | Cue 用缓存兜底，标注"来源暂不可达" |
 
@@ -270,7 +270,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-supply-chain-mining) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-supply-chain-mining) 生成后点「复制」并粘贴发送给您正在使用的智能体（Agent 无法代生成，也无权查看） |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 

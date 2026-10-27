@@ -4,7 +4,7 @@ name: cue-bidding-insight
 Name: 招投标全景透视
 description: 用 Cue 双擎互补全量扫描招投标情报——内部 MCP + 外部搜索引擎互补，自动防截断分块，物理隔离"正在招标"与"已结束"项目，补齐联系方式、溯源大额项目，帮你比竞争对手早一步发现商机。只给「一个业务关键词（可搭配时间、地区）」的批量扫描走全景透视；只要提到具体公司（如锦州石化）或具体项目，一律走自由式深度研究，绝不套用模板。
 description_zh: Cue 招投标全景透视：双擎互补全量扫描招投标情报，自动防截断，正在招标与已结束物理隔离，B端拓客与竞对监控利器；只给「一个业务关键词（可搭配时间、地区）」批量扫描，提到具体公司（如锦州石化）/具体项目一律走自由式深研，不套模板。
-version: 1.5.1
+version: 1.5.2
 author: sensedeal
 tags: [cue, bidding, procurement, lead-generation, competitive-intelligence, 招投标, 商机挖掘, 竞对监控, 政企销售, B端拓客]
 ---
@@ -394,12 +394,12 @@ fi
 
 依赖：`git` + `python3` + `curl`（macOS 自带，Linux `apt install git python3 curl`）。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-bidding-insight) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-bidding-insight) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。
 
 - **积分赠送**：新注用户赠送 500 积分，邀请新用户再送 500 积分。
 - **积分不足**：积分用完后，前往 [cuecue.cn/pay](https://cuecue.cn/pay) 页面进行订阅。
 
-> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 
 ---
 
@@ -472,7 +472,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-bidding-insight) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-bidding-insight) 生成后点「复制」并粘贴发送给您正在使用的智能体，再由 Agent 写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 企查查-招投标 / 知了标讯 | 各数据源 | 部分数据源可能限流或临时不可达，Cue 标注"部分源暂不可达" |
 
@@ -491,7 +491,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-bidding-insight) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-bidding-insight) 生成后点「复制」并粘贴发送给您正在使用的智能体（Agent 无法代生成，也无权查看） |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 

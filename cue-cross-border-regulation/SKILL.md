@@ -2,7 +2,7 @@
 name: cue-cross-border-regulation
 slug: cue-cross-border-regulation
 displayName: 跨境法规调研
-version: 1.2.1
+version: 1.2.2
 description: >
   专为出海企业法务、合规官及涉外律师打造的 AI 跨境法规调研助手。解决境外法规「查不到、看不懂、判不准」的三大痛点。它直连 EUR-Lex、GovInfo、新加坡 Statutes 等海外官方权威数据库，为你精准捞出目标法域的法规原文、提炼立法背景与适用边界。全中文交付研究报告，核心条款中英对照，每个结论均附带官方公报出处链接，可逐条溯源。让出海合规尽调、涉外诉讼查明、跨境比较法研究从此高效且有据可依。
   Triggers: 跨境法规、境外法规、外国法律、海外法规调研、欧盟法规、美国法律、GDPR、DMA、SEC规则、CFIUS、跨境合规、cross-border regulation、foreign law
@@ -45,11 +45,11 @@ metadata:
 
 ## 快速开始（仅需 1 步）
 
-🔑 **注册后免费创建 API Key**：先打开 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-cross-border-regulation) 免费注册账号；登录后进入 API Key 页面，点击「创建 API Key」即可免费生成（新账号送 500 积分，每天再送 10 积分）。
+🔑 **注册后免费创建 API Key**：先打开 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-cross-border-regulation) 免费注册账号；登录后进入 API Key 页面，点击「创建 API Key」即可免费生成（新账号送 500 积分，每天再送 10 积分）。生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。
 
 *(拿到 Key 后直接发给本 AI 助手，它会自动完成网络探测、海外数据库检索及报告生成，您只需安心等待。)*
 
-> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 
 ### 配置成功后引导用户跑第一个任务（必须执行）
 

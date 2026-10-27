@@ -3,7 +3,7 @@ name: cue-personal-legal-assistant
 display_name: 个人法律助手
 display_name_en: Personal Legal Assistant
 displayName: 个人法律助手
-version: 1.4.1
+version: 1.4.2
 description: >
   个人法律助手 — 大众个人遇到法律疑难问题，别急着打官司：把情况说清楚，它帮你做个性化分析、给出解决方案——拿不准的先看同类案子法院怎么判、大概赔多少；真要打官司，帮你起草起诉状、答辩状等文书或审校已有文书；还能查法规、研判问题、逐条解读、对比中外规定。每个结论都带来源链接、可逐条回查，普通人维权心里有底，律师办案更快更有据。
 description_zh: >
@@ -119,11 +119,11 @@ metadata:
 
 ## 使用前（只需 1 步）
 
-🔑 **注册后免费创建 API Key**：先打开 [cuecue.cn](https://cuecue.cn/api-key?src=github-personal-legal-assistant) 免费注册账号；登录后进入 API Key 页面，点击「创建 API Key」即可免费生成（现在注册送 500 积分）。
+🔑 **注册后免费创建 API Key**：先打开 [cuecue.cn](https://cuecue.cn/api-key?src=github-personal-legal-assistant) 免费注册账号；登录后进入 API Key 页面，点击「创建 API Key」即可免费生成（现在注册送 500 积分）。生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。
 
 *(拿到 key 后直接发给助手即可，剩下的环境依赖和配置统统由 AI 助手全自动为你完成！)*
 
-> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 
 ### 配置成功后引导用户跑第一个任务（必须执行）
 

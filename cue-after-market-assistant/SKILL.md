@@ -3,7 +3,7 @@ name: cue-after-market-assistant
 displayName: 盘后超级助理
 description: 用 Cue 通常 5-10 分钟（最长约 15 分钟）自动生成深度市场复盘报告——穿透涨跌逻辑与资金流向，帮你快速看懂今天市场发生了什么、自己的持仓受了什么影响、明天该盯哪些信号；还能指定板块，深挖你关注的那条主线。只做大盘/板块层面的复盘，不分析单只个股（个股请用「短线走势与技术面分析」）。
 description_zh: Cue 盘后超级助理：通常 5-10 分钟、最长约 15 分钟生成深度复盘，看懂涨跌原因、资金动向、持仓影响、次日关注；可指定板块，深挖你关注的主线（仅市场层面，不分析单只个股）。
-version: 1.5.2
+version: 1.5.3
 author: sensedeal
 tags: [cue, after-market, market-recap, 盘后复盘, 市场复盘, 收盘分析, 个人投资, 持仓检视, 可视化, 看板, dashboard]
 ---
@@ -197,7 +197,7 @@ python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
 
 依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
 
-Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-after-market-assistant) 注册后免费创建。
+Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-after-market-assistant) 注册后免费创建。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 
@@ -212,7 +212,7 @@ else
 fi
 ```
 
-> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 
 ---
 
@@ -328,7 +328,7 @@ Cue 报告是文字底稿，用户常希望"一眼看懂"。**每次交付都必
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-after-market-assistant) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-after-market-assistant) 生成后点「复制」并粘贴发送给您正在使用的智能体，再由 Agent 写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源 | 公开网站 | Cue 用缓存兜底，标注"来源暂不可达" |
 
@@ -347,7 +347,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-after-market-assistant) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-after-market-assistant) 生成后点「复制」并粘贴发送给您正在使用的智能体（Agent 无法代生成，也无权查看） |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 

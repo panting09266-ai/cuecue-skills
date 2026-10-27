@@ -2,7 +2,7 @@
 name: cue-overseas-litigation
 slug: cue-overseas-litigation
 displayName: 境外诉讼案例库
-version: 1.3.1
+version: 1.3.2
 description: >
   境外诉讼案例库 — 围绕一个主题检索主要法域的公开判例与监管公告，归纳诉因、判决倾向与对中国主体的合规启示。
   Triggers: 境外诉讼、海外官司、跨境诉讼、海外判例、境外监管公告、国际诉讼案例、制裁案例、出口管制案例、涉外法律检索、overseas litigation、cross-border litigation
@@ -115,7 +115,7 @@ else
 fi
 ```
 
-Cue API Key：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-overseas-litigation) 注册后免费创建，新账号送 500 积分 + 每天 10 积分。写入 `~/.cue/config.json`：
+Cue API Key：在 [cuecue.cn](https://cuecue.cn/api-key?src=github-overseas-litigation) 注册后免费创建，新账号送 500 积分 + 每天 10 积分。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。写入 `~/.cue/config.json`：
 
 ```bash
 mkdir -p ~/.cue
@@ -124,7 +124,7 @@ echo '{"api_key": "sk你的key"}' > ~/.cue/config.json
 
 单次研究消耗约 3-8 credits。
 
-> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，只给出生成入口并等待用户提供，**禁止声称"我去生成/查看"**。
+> **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 
 ---
 
@@ -182,7 +182,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-overseas-litigation) 生成后写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-overseas-litigation) 生成后点「复制」并粘贴发送给您正在使用的智能体，再由 Agent 写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源 | 公开网站 | Cue 用缓存兜底，标注"来源暂不可达" |
 
@@ -201,7 +201,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-overseas-litigation) 生成后发给你（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-overseas-litigation) 生成后点「复制」并粘贴发送给您正在使用的智能体（Agent 无法代生成，也无权查看） |
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 
