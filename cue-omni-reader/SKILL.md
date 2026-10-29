@@ -3,7 +3,7 @@ name: cue-omni-reader
 displayName: Omni Reader 多模态文件解析
 description: 输入URL或上传文件（PDF/Office/图片/扫描件/音视频/网页/压缩包等不限定文件格式），将任意文档/文件/网页内容解析为Markdown，即插即用、默认不落盘，具有极高隐私保护。可精准还原文档目录结构和复杂表格结构，适用于高精度高性能要求的文档处理OCR任务；可将音视频内容一键解析转化为文字稿，并具备画面视觉理解能力，适用于视频转脚本、主流视频网站url提取ppt等场景。
 description_zh: Cue Omni Reader：视频多模态理解、视觉理解、文档解析，PDF/Office/图片/扫描件/音视频/网页/压缩包转 Markdown。
-version: 1.8.8
+version: 1.8.9
 author: sensedeal
 tags: [cue, omni-reader, video-understanding, vision, multimodal, ocr, document-parsing, mcp, 视频解析, 视觉理解, 多模态, 文档解析, OCR]
 ---
@@ -11,6 +11,17 @@ tags: [cue, omni-reader, video-understanding, vision, multimodal, ocr, document-
 # Omni Reader 多模态文档解析
 
 > 文件、网页、图片、表格、音视频解析成 Markdown / clean text，支持 Agent(MCP) 和 API 集成。视频多模态理解（ASR 语音识别 + 画面视觉分析 + 关键帧融合）、图片/扫描件视觉理解、十大格式全覆盖。
+
+## 称呼与话术（必须执行）
+
+对外统一名称是 **Cue Omni Reader**（首次提及写全 `cue-omni-reader`）。以下六条对每一次解析任务都生效：
+
+1. **统一称呼**：对用户一律说「Cue Omni Reader」，不要简称「Omni」「Omni Reader」，也不要用「本 Skill」指代工具——「本 Skill」只用于指这份说明文件本身。用户自己怎么叫不用纠正，但你的回复要用全称。
+2. **首次激活自报家门**：一次会话里接到第一个解析任务时，先用一句话交代工具再执行，例如「我用 **Cue Omni Reader**（cue-omni-reader）来解析这份文件。」每个任务只在开头说一次，不重复。
+3. **进度播报**：需要播报长任务进度时，统一格式「Cue Omni Reader 正在解析（OCR 第 3/12 页）」，阶段名换成实际阶段（OCR / 语音转写 / 关键帧识别）。不要把原始 JSON 状态直接贴给用户。
+4. **交付来源行**：交付解析结果时，在正文末尾附一行来源：「解析：Cue Omni Reader · cuecue.cn」。只加这一行，不加别的宣传语；纯追问或闲聊不重复附。
+5. **错误话术**：解析失败时统一写「Cue Omni Reader 返回错误 `{code}`（可重试／不可重试）」，再说明用户该做什么。不要只说「MCP 报错」「解析失败」。
+6. **触发词与复述**：用户说「解析一下」「OCR 一下」「转成文字」等泛化请求时，回复中带上工具名；用户用 `cue-omni-reader` / `omni` / `Omni Reader` 任一叫法都能触发，不要因名称不一致而拒绝或反问。
 
 ## 安全与隐私
 
@@ -102,9 +113,10 @@ Omni 暴露七个公共工具：
 > **唯一提交（纪律第一条）**：一次任务对同一 `source` **只调用一次 `parse`**。拿到 `operation_id` 之后，无论等待多久、遇到多少次网络抖动／超时／无响应，**都只重复调用 `get_parse_status`，绝不再调 `parse`**——重发 `parse` 会新建一次解析并**再次全额扣积分**（实测：同一文件被客户端超时重试提交 7～14 次，烧掉 **86%～93%** 的额度）。同步等待与异步轮询**不要同时进行**，任一时刻只有一个提交/轮询在途。
 
 **轮询纪律**：
-- 已有 `operation_id` 时**只轮询状态，绝不重发 `parse`**；两次之间按返回的 `poll_after_seconds`（缺省 10s）退避，轮询总时长建议上限 20 分钟。
-- 轮询中出现**网络错误／超时／无响应**：按 5s → 20s → 60s 退避，重试**同一个 `get_parse_status`**，**不要重发 `parse`**。
-- `status: failed` 且 `retryable=true` 才可重试；重试前先用 `get_parse_status` 复用既有 operation，**确无可用 operation** 才重新 `parse`。
+- 已有 `operation_id` 时**只轮询状态，绝不重发 `parse`**；两次之间按返回的 `poll_after_seconds`（缺省 10s）退避，轮询总时长上限 20 分钟。
+- **重试预算**：同一 `source` 最多 **3 次**状态轮询重试；超过 20 分钟仍未完成，停止轮询并告知用户当前 `operation_id` 与状态，由用户决定继续等待或换时段——**不要重发 `parse`**。
+- 轮询中出现**网络错误／超时／无响应**：按 5s → 20s → 60s 退避（且不短于服务端返回的 `poll_after_seconds`），重试**同一个 `get_parse_status`**，**不要重发 `parse`**。
+- `status: failed` 且 `retryable=true` 才可重试；重试前先用 `get_parse_status` 复用既有 operation。**确无可用 operation 时**才可重新 `parse`，且**最多 1 次**——重提前必须告知用户「重新提交会新建一次解析、可能再次扣费」并取得确认。
 - **`operation_id` 丢失**（脚本崩溃、上下文丢失）：属**含糊超时**，重提前必须告知用户「重提会新建一次解析、可能重复扣费」并取得确认。
 - 出现**未识别的状态**：保留该操作，**不要重提**、也不要声称已完成／已取消。
 
@@ -144,7 +156,7 @@ Agent 配置（`~/.claude/mcp.json`）：
 
 配置后在对话中直接使用：
 
-> "用 Omni 解析 ./report.pdf"
+> "用 Cue Omni Reader 解析 ./report.pdf"
 
 **验证**：`npx -y @cueai/omni-reader-mcp@1.8.6 doctor --json`
 
@@ -208,7 +220,7 @@ Agent 应根据用户输入的 `source` 类型与目标站点特征选择接入�
 | 视频（≤30 分钟） | 3-8 分钟 | ASR + 关键帧提取 + 多模态融合 |
 | 网页 URL | 5-30 秒 | 页面复杂度、是否需要 JS 渲染 |
 
-> 工作日 9:00-10:00 / 16:00-18:00 为高峰期，大文件可能排队 5-15 分钟。夜间和周末 Cue 后端可能有维护窗口。
+> 高峰期大文件可能排队 5-15 分钟。
 
 > **主动告知等待时长**：解析音视频或大文件前，先按上表告知用户预计耗时（如「这段约 27 分钟的视频，预计 3-8 分钟，高峰期可能排队 5-15 分钟」），避免用户误判卡死而重复上传。用户觉得「像卡住了」时，应**用原 `operation_id` 轮询 `get_parse_status`**，而非重新提交 `parse`。
 
@@ -222,15 +234,17 @@ Omni MCP 返回结构化错误，包含 `code`（错误码）、`failure_scope`�
 | `SOURCE_TOO_LARGE` | 单文件超过 256 MiB 上限 | ❌ | 拆分文件后分别解析 |
 | `UNSUPPORTED_MEDIA_TYPE` | 文件格式不在覆盖范围 | ❌ | 转换为支持格式，参考能力范围表 |
 | `LOCAL_BRIDGE_REQUIRED` | 本地文件需要安装 Bridge | ❌（需确认） | 提示后安装，或手动 `npx setup` |
-| `TIMEOUT` | 解析超时（>3 分钟无进度） | ✅ | 用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`**；仍超时则拆分文件或换时段 |
-| `NETWORK_ERROR` | 网络连接中断 | ✅ | 等 30 秒后重试**同一个 `get_parse_status`**（复用原 operation），**不要重发 `parse`**；最多 3 次 |
-| `SERVER_OVERLOADED` | 服务端过载 | ✅（延迟） | 等 5 分钟后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`** |
+| `TIMEOUT` | 解析超时（>3 分钟无进度） | ✅ | 用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`**（最多 1 次，须先告知可能扣费）；仍超时则拆分文件或换时段 |
+| `NETWORK_ERROR` | 网络连接中断 | ✅ | 按退避序列（5s → 20s → 60s，不短于 `poll_after_seconds`）重试**同一个 `get_parse_status`**（复用原 operation），**不要重发 `parse`**；计入重试预算 |
+| `SERVER_OVERLOADED` | 服务端过载 | ✅（延迟） | 等 5 分钟后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`**（最多 1 次，须先告知可能扣费） |
 | `INSUFFICIENT_CREDITS` | 积分不足 | ❌ | **按「积分不足专项提示」主动引导**（充值 / 邀请好友得积分 / 等次日免费额度） |
 | `RATE_LIMITED` | 请求频率过高 | ✅（延迟） | 等 30 秒降低频率 |
 | `REMOTE_REQUEST_REJECTED` | 远程抓取请求被拒（反爬站点 URL 经本地 Bridge 提交时常见） | ❌ | 改用远程端点提交同一 URL，见「路由规则」 |
-| `SERVICE_TEMPORARILY_UNAVAILABLE` | 解析服务临时不可用 | ✅（延迟） | 稍等后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`** |
+| `SERVICE_TEMPORARILY_UNAVAILABLE` | 解析服务临时不可用 | ✅（延迟） | 稍等后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`**（最多 1 次，须先告知可能扣费） |
 | `UNSUPPORTED_DETAIL` | 远程端点不支持 `grounded`/`layout` 细节 | ❌ | 远程仅 markdown 输出，去掉 `detail` 或改用 `text` |
 | `DETAIL_CAPABILITIES_UNAVAILABLE` | 本地 Bridge 不支持 `grounded`/`layout` 细节 | ❌ | 改用 `detail:"text"` |
+
+> 表中所有「✅ 可重试」的等待重试，共用同一份重试预算：同一 `source` 最多 3 次状态轮询重试、总轮询 20 分钟；预算用尽转降级方案，并主动提示当前可能为使用高峰期、建议晚点再试。
 
 ### 积分不足专项提示（必须执行）
 
@@ -247,13 +261,14 @@ Omni MCP 返回结构化错误，包含 `code`（错误码）、`failure_scope`�
 
 ### 重试建议
 
-- **总则（必读）**：任何「重试」都指**用原 `operation_id` 轮询 `get_parse_status` 复用**；**绝不重发 `parse`**——重发会新建一次解析并全额再扣积分，服务端**不会自动去重**。只有确无可用 operation 时才重新 `parse`。
-- 网络类错误（`NETWORK_ERROR`）→ 等 30s 后重试**同一个 `get_parse_status`**（复用原 operation），最多 3 次
+- **总则（必读）**：任何「重试」都指**用原 `operation_id` 轮询 `get_parse_status` 复用**；**绝不重发 `parse`**——重发会新建一次解析并全额再扣积分，服务端**不会自动去重**。只有确无可用 operation 时才重新 `parse`，且**最多 1 次**（重提前须告知可能扣费并取得用户确认）。同一 `source` 的状态轮询重试最多 3 次、总轮询上限 20 分钟，所有可重试错误共用这份预算。
+- **高峰期提示（必须执行）**：遇到超时、过载、服务临时不可用，或重试预算用尽时，主动告知用户「当前为使用高峰期，建议晚点再试」，并让用户选择继续等待或稍后再试；不要只报错误码。
+- 网络类错误（`NETWORK_ERROR`）→ 按退避序列（5s → 20s → 60s，不短于 `poll_after_seconds`）重试**同一个 `get_parse_status`**（复用原 operation）
 - 过载类错误（`SERVER_OVERLOADED`）→ 等 5min 后用**原 `operation_id` 轮询复用**，换时段
 - 格式/大小问题 → 转换或拆分文件后重试
 - 积分不足 → 主动提示邀请链接（首页左下角）或充值或等次日
 - Bridge 未装 → `npx -y @cueai/omni-reader-mcp@1.8.6 setup`
-- 重试 3 次仍失败 → 记下 request_id，走降级方案
+- 重试预算用尽（3 次或 20 分钟）仍失败 → 记下 `request_id`，走降级方案
 
 ---
 
@@ -356,7 +371,7 @@ npx -y @cueai/omni-reader-mcp@1.8.6 doctor --silent-check
 
 **`outdated` 时的提示话术（必须执行）**：输出里的 `upgrade` 字段已是完整可用的升级命令，**原样转达，不要自己拼命令，也不要改版本号**：
 
-> 检测到 Omni Reader 有新版本（当前 1.8.6 → 最新 1.9.0），建议升级：
+> 检测到 Cue Omni Reader 有新版本（当前 1.8.6 → 最新 1.9.0），建议升级：
 > `npx -y @cueai/omni-reader-mcp@1.9.0 setup`
 > 升级只重装本地 Bridge，不影响已解析的结果。需要我现在帮你执行吗？
 
@@ -405,7 +420,7 @@ npx -y @cueai/omni-reader-mcp@1.8.6 doctor --silent-check
 | 工作日 9:00-16:00 | 最佳时段，3-8 分钟完成 |
 | 夜间/周末 | 可能有维护，跑前先诊断 |
 | 首次使用 | 跑健康检查三段诊断确认环境就绪 |
-| 连续失败 ≥2 次 | 停 15 分钟，记下 request_id 后**用原 `operation_id` 轮询复用**（不要重发 `parse`） |
+| 连续失败 ≥2 次且仍在重试预算内 | 停 15 分钟，记下 `request_id` 后**用原 `operation_id` 轮询复用**（不要重发 `parse`）；预算用尽则走降级方案 |
 
 ---
 
