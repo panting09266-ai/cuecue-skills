@@ -3,7 +3,7 @@ name: xiaohongshu-video-studio
 displayName: 小红薯短视频全解析
 description: 小红薯短视频一站式解析与创作工场。用户直接输入小红薯视频链接加一句简单要求即可：视频转文字（字幕/口播/画面内容）、内容分析总结、爆款视频拆解（按带货/流量逻辑拆结构分段、脚本类型、爆款归因、六维评分报告，照着学照着抄）、视频转脚本（镜头/运镜/转场/情绪/时间线/屏幕文字）、爆款脚本生成（原骨架改写成你的脚本，或按方向/目的/商品原创口播脚本，含分段表与六维质检评分）、视频提示词反推（画面和内容转成 agent 可理解的提示词）。底层经 Cue Omni Reader 远程端点解析（自动绕过小红薯反爬），再由大模型按场景加工交付。
 description_zh: 小红薯短视频全解析：链接直达，转文字/分析总结/爆款拆解六维评分/转脚本/脚本生成/提示词反推，六大场景全覆盖。
-version: 1.2.2
+version: 1.2.3
 author: sensedeal
 tags: [xiaohongshu, 小红薯, video, 短视频, 爆款拆解, 脚本生成, 视频转文字, 提示词反推, 内容创作, 带货, 口播, omni-reader]
 ---
@@ -17,7 +17,7 @@ tags: [xiaohongshu, 小红薯, video, 短视频, 爆款拆解, 脚本生成, 视
 - 你提供的**视频链接**会发送至 Cue 远程解析端点（`mcp.cuecue.cn`）抓取并解析，解析结果由大模型加工后交付。
 - 默认 `no_store=true`：源文件与解析结果**不落盘**、不持久化于服务端。
 - 本技能**不读取、不收集**你的浏览器 Cookie、登录态或任何本地敏感数据；降级方案不含登录态/Cookie 操作。
-- Cue API Key 仅用于鉴权，推荐用环境变量 `CUE_API_KEY` 传入，避免明文写入配置文件。
+- Cue API Key 仅用于鉴权；Agent 只在本机读取使用，不写入日志、不回显到对话。
 
 
 
@@ -42,13 +42,14 @@ tags: [xiaohongshu, 小红薯, video, 短视频, 爆款拆解, 脚本生成, 视
 
 ## 前置依赖（新用户首次使用只需做这一件事）
 
-- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-xiaohongshu-video-studio)（新账号送 500 积分 + 每天 10 免费积分）。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。详见「积分不足专项提示」。推荐用环境变量传入，避免明文写盘：
+- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-xiaohongshu-video-studio)（新账号送 500 积分 + 每天 10 免费积分）。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发给我，我写进本机 `~/.cue/config.json` 就能跑。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。详见「积分不足专项提示」。**如果你不想让 Key 出现在对话里**，也可以自己从下面选一种配好，配好告诉我一声即可（环境变量需写入 shell 启动文件并重开终端/客户端才生效）：
 
   ```bash
+  # 方式一：环境变量
   export CUE_API_KEY="sk你的key"
   ```
 
-  如确需落盘，可写 `~/.cue/config.json`（格式 `{"api_key": "sk你的key"}`）。
+  方式二：写 `~/.cue/config.json`（格式 `{"api_key": "sk你的key"}`，建议 `chmod 600 ~/.cue/config.json`）。
 
 - **远程端点直连（无需本地 Bridge、无需配置 MCP）**：小红薯视频解析只走远程端点 `https://mcp.cuecue.cn/api/omni-reader/mcp/`（streamable-http），鉴权头 `Authorization: Bearer <Cue Key>`。不依赖 `~/.mcp.json` 注册 MCP，也不装本地 Bridge；本地 Bridge 仅在降级方案中使用。
 - 手动调用依赖：`curl`（Python 参考实现另需 `python3`，仅标准库）。实际使用时 Agent 自动完成解析，用户只需给一个小红薯视频链接 + 一句需求。
@@ -64,7 +65,7 @@ tags: [xiaohongshu, 小红薯, video, 短视频, 爆款拆解, 脚本生成, 视
 >
 > 用户发来 Key 后，Agent 负责写入 `~/.cue/config.json`（格式 `{"api_key": "sk..."}`），写完即可重跑，无需重启客户端。
 >
-> **Key 纪律**：只在用户本机写入，**禁止回显到对话、日志或任何文件示例中**；用户若把 Key 贴在了对话里，提醒他可以去 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-xiaohongshu-video-studio) 轮换一把。
+> **Key 纪律**：只在用户本机写入，**禁止回显到对话、日志或任何文件示例中**；用户若担心 Key 曾在别处暴露，可提醒去 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-xiaohongshu-video-studio) 轮换一把。
 
 ### 健康检查（跑解析前先验证三件事）
 
@@ -84,7 +85,7 @@ echo "=== 3/3 curl ===" && { command -v curl >/dev/null && echo "就绪" || echo
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-xiaohongshu-video-studio) 生成后**点「复制」并粘贴发送给您正在使用的智能体**（Agent 无法代生成，也无权查看）；话术见上方引用块 |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-xiaohongshu-video-studio) 生成后**点「复制」并粘贴发给我**（Agent 无法代生成，也无权查看）；话术见上方引用块 |
 | 远程端点 | `已连接（3 工具）` | 等 5 分钟重试；仍不通查网络/DNS，或走「降级方案」；报 `Authentication required` = Key 没带上或已失效 |
 | curl | `就绪` | 系统一般自带；缺失时用 `python3` + `urllib` 带浏览器 UA 做等价重定向跟随（见步骤 0） |
 

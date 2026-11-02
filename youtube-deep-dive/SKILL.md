@@ -3,7 +3,7 @@ name: youtube-deep-dive
 displayName: YouTube 视频深度解析
 description: 输入一个 YouTube 视频链接，输出**带时间戳**的完整文字稿——口播 ASR（区分说话人）+ 关键帧画面文字与视觉要点——并附一份深度总结分析（主旨、结构大纲、核心要点、金句、提到的书/人名/数据/工具）。底层经 Cue Omni Reader 远程端点解析（ASR + 关键帧视觉理解，自动绕过平台反爬），再由大模型整理概括交付。
 description_zh: Cue YouTube 视频深度解析：链接直达，带时间戳的口播+画面双轨文字稿 + 深度总结分析。
-version: 1.0.4
+version: 1.0.5
 author: sensedeal
 tags: [cue, youtube, 视频解析, 视频转文字, 转文字, 字幕, 转录, 摘要, 说话人分离, 视觉理解, multimodal, omni-reader]
 ---
@@ -29,7 +29,7 @@ tags: [cue, youtube, 视频解析, 视频转文字, 转文字, 字幕, 转录, �
 - 你提供的**视频链接**会发送至 Cue 远程解析端点（`mcp.cuecue.cn`）抓取并解析，解析结果由大模型加工后交付。
 - 默认 `no_store=true`：源文件与解析结果**不落盘**、不持久化于服务端；大结果（>64 KiB）暂存本机，24h 后自动清除。
 - 本技能**不读取、不收集**你的浏览器 Cookie、登录态或任何本地敏感数据。
-- Cue API Key 仅用于鉴权，推荐用环境变量 `CUE_API_KEY` 传入，避免明文写入配置文件。
+- Cue API Key 仅用于鉴权；Agent 只在本机读取使用，不写入日志、不回显到对话。
 
 ## 输出内容（两件套）
 
@@ -50,13 +50,14 @@ tags: [cue, youtube, 视频解析, 视频转文字, 转文字, 字幕, 转录, �
 
 ## 前置依赖（新用户首次使用只需做这一件事）
 
-- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-youtube-deep-dive)（新账号送 500 积分 + 每天 10 免费积分）。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。
+- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-youtube-deep-dive)（新账号送 500 积分 + 每天 10 免费积分）。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发给我，我写进本机 `~/.cue/config.json` 就能跑。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。**如果你不想让 Key 出现在对话里**，也可以自己从下面选一种配好，配好告诉我一声即可（环境变量需写入 shell 启动文件并重开终端/客户端才生效）：
 
   ```bash
+  # 方式一：环境变量
   export CUE_API_KEY="sk你的key"
   ```
 
-  如确需落盘，可写 `~/.cue/config.json`（格式 `{"api_key": "sk你的key"}`）。
+  方式二：写 `~/.cue/config.json`（格式 `{"api_key": "sk你的key"}`，建议 `chmod 600 ~/.cue/config.json`）。
 
 - **远程端点直连（无需本地 Bridge、无需配置 MCP）**：YouTube 解析只走远程端点 `https://mcp.cuecue.cn/api/omni-reader/mcp/`（streamable-http），鉴权头 `Authorization: Bearer <Cue Key>`。不依赖 `~/.mcp.json` 注册 MCP，也不装本地 Bridge。
 - 手动调用依赖：`curl`（Python 参考实现另需 `python3`，仅标准库）。实际使用时 Agent 自动完成解析，用户只需给一个视频链接 + 一句需求。
@@ -70,7 +71,7 @@ tags: [cue, youtube, 视频解析, 视频转文字, 转文字, 字幕, 转录, �
 > > 2. 把 Key **完整复制**下来
 > > 3. **一定要点击「复制」，再粘贴发给我**，我帮你写进配置，然后马上就能跑
 >
-> **Key 纪律**：只在用户本机写入，**禁止回显到对话、日志或任何文件示例中**；用户若把 Key 贴在了对话里，提醒他可以去 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-youtube-deep-dive) 轮换一把。
+> **Key 纪律**：只在用户本机写入，**禁止回显到对话、日志或任何文件示例中**；用户若担心 Key 曾在别处暴露，可提醒去 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-youtube-deep-dive) 轮换一把。
 
 ### 健康检查（跑解析前先验证）
 
@@ -90,7 +91,7 @@ echo "=== 3/3 curl ===" && { command -v curl >/dev/null && echo "就绪" || echo
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-youtube-deep-dive) 生成后**点「复制」并粘贴发送给您正在使用的智能体**（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-youtube-deep-dive) 生成后**点「复制」并粘贴发给我**（Agent 无法代生成，也无权查看） |
 | 远程端点 | `已连接（3 工具）` | 等 5 分钟重试；仍不通查网络/DNS；报 `Authentication required` = Key 没带上或已失效 |
 | curl | `就绪` | 系统一般自带；缺失时用 `python3` + `urllib` 做等价请求 |
 

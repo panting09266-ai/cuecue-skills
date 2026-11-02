@@ -3,7 +3,7 @@ name: audio-transcribe
 displayName: 音频录音转文字（区分人声）
 description: 输入一段音频录音文件——本地音频文件（MP3/WAV/M4A/AAC/FLAC/OGG）或在线音频链接——输出**带时间戳、可区分说话人**的文字稿，并附一份总结分析。底层经 Cue Omni Reader 解析（ASR 语音识别 + 说话人分离），再由大模型分段整理交付。适用于会议录音、访谈、讲座、通话录音、口述笔记等。
 description_zh: Cue 录音转文字：本地音频或链接一键转录，带时间戳、区分说话人，并给出总结分析。
-version: 1.0.3
+version: 1.0.4
 author: sensedeal
 tags: [cue, audio, transcription, asr, 录音转文字, 语音转文字, 会议纪要, 访谈转录, 说话人分离, 会议记录, omni-reader]
 ---
@@ -35,7 +35,7 @@ tags: [cue, audio, transcription, asr, 录音转文字, 语音转文字, 会议�
 - **在线音频链接**会发送至 Cue 远程解析端点（`mcp.cuecue.cn`）抓取并解析；**本地音频文件**由本地 Bridge 直接读取（文件不经过服务端）。
 - 默认 `no_store=true`：源文件与解析结果**不落盘**、不持久化于服务端；大结果（>64 KiB）暂存本机，24h 后自动清除。
 - 本技能**不读取、不收集**用户的浏览记录、通讯录或任何本地敏感数据。
-- Cue API Key 仅用于鉴权，推荐用环境变量 `CUE_API_KEY` 传入，避免明文写入配置文件。
+- Cue API Key 仅用于鉴权；Agent 只在本机读取使用，不写入日志、不回显到对话。
 
 ## 输出内容（两件套）
 
@@ -54,13 +54,14 @@ tags: [cue, audio, transcription, asr, 录音转文字, 语音转文字, 会议�
 
 ## 前置依赖（新用户首次使用只需做这一件事）
 
-- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-audio-transcribe)（新账号送 500 积分 + 每天 10 免费积分）。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。
+- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-audio-transcribe)（新账号送 500 积分 + 每天 10 免费积分）。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发给我，我写进本机 `~/.cue/config.json` 就能跑。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。**如果你不想让 Key 出现在对话里**，也可以自己从下面选一种配好，配好告诉我一声即可（环境变量需写入 shell 启动文件并重开终端/客户端才生效）：
 
   ```bash
+  # 方式一：环境变量
   export CUE_API_KEY="sk你的key"
   ```
 
-  如确需落盘，可写 `~/.cue/config.json`（格式 `{"api_key": "sk你的key"}`）。
+  方式二：写 `~/.cue/config.json`（格式 `{"api_key": "sk你的key"}`，建议 `chmod 600 ~/.cue/config.json`）。
 
 - **在线音频链接**：走远程端点 `https://mcp.cuecue.cn/api/omni-reader/mcp/`（streamable-http），鉴权头 `Authorization: Bearer <Cue Key>`，无需本地 Bridge。
 - **本地音频文件**：需安装本地 Bridge（`npx -y @cueai/omni-reader-mcp@1.8.6 setup`），并把音频所在目录加入 `OMNI_ALLOWED_ROOTS`（冒号分隔）。**远程端点读不了本地文件。**
@@ -75,7 +76,7 @@ tags: [cue, audio, transcription, asr, 录音转文字, 语音转文字, 会议�
 > > 2. 把 Key **完整复制**下来
 > > 3. **一定要点击「复制」，再粘贴发给我**，我帮你写进配置，然后马上就能跑
 >
-> **Key 纪律**：只在用户本机写入，**禁止回显到对话、日志或任何文件示例中**；用户若把 Key 贴在了对话里，提醒他可以去 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-audio-transcribe) 轮换一把。
+> **Key 纪律**：只在用户本机写入，**禁止回显到对话、日志或任何文件示例中**；用户若担心 Key 曾在别处暴露，可提醒去 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-audio-transcribe) 轮换一把。
 
 ### 健康检查（跑解析前先验证）
 
@@ -95,7 +96,7 @@ echo "=== 3/3 本地文件支持 ===" && { [ -d "$HOME/.cue/cue-skills" ] && ech
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
-| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-audio-transcribe) 生成后**点「复制」并粘贴发送给您正在使用的智能体**（Agent 无法代生成，也无权查看） |
+| API Key | `已配置` | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-audio-transcribe) 生成后**点「复制」并粘贴发给我**（Agent 无法代生成，也无权查看） |
 | 远程端点 | `已连接（3 工具）` | 等 5 分钟重试；仍不通查网络/DNS；报 `Authentication required` = Key 没带上或已失效 |
 | 本地文件 | 视输入而定 | 解析**本地音频**时需本地 Bridge：`npx -y @cueai/omni-reader-mcp@1.8.6 setup`，并把目录加入 `OMNI_ALLOWED_ROOTS` |
 
