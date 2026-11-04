@@ -3,7 +3,7 @@ name: cue-fund-penetration
 displayName: 基金组合持仓穿透分析
 description: 用 Cue 穿透你的基金组合持仓——你以为分散了，其实买了一篮子同样的东西。逐层拆解股票/行业/风格暴露，检测重复配置与集中度风险，逐只排雷。
 description_zh: 基金组合持仓穿透分析（公募基金组合穿透）：穿透持仓底层资产，检测重复配置与集中度风险，真正的分散才叫分散。
-version: 1.2.3
+version: 1.2.4
 author: sensedeal
 tags: [cue, fund-penetration, portfolio-analysis, concentration-risk, 基金, 持仓穿透, 重复配置, 集中度风险, 组合诊断, 基金组合查重, 基金买重了]
 ---
@@ -102,7 +102,7 @@ tags: [cue, fund-penetration, portfolio-analysis, concentration-risk, 基金, �
 | 4 | `[cue-research] RESULT ok` = 完成 | 禁止编造 |
 | 5 | 原样交付，标注数据截止日期（季报披露时间） | 禁止概括 |
 | 6 | 交付时**同时附带 Cue 原始报告链接** | 禁止编造链接 |
-| 7 | 遇 `INSUFFICIENT_CREDITS` 主动提示邀请链接 | 禁止只丢错误码 |
+| 7 | 遇 `INSUFFICIENT_CREDITS` 按「积分不足专项提示」给出两条路径 | 禁止只丢错误码 |
 
 ## 核心能力
 
@@ -149,6 +149,33 @@ https://cuecue.cn/share/<conv_id>
 
 ---
 
+### 跑后余额检查（交付前必做）
+
+拿到最终结果（`RESULT ok` / 解析完成）后、交付前，复用健康检查 / 跑前积分检查里的「剩余积分」查询命令再查一次（无健康检查的 skill 用本 skill 已有的积分查询），**不轮询**；查询失败不阻断交付。记下「跑后剩余积分」：若 **< 100**，本次照常交付，交付完成后按「低余额三选一」主动引导。
+
+### 低余额三选一（跑后剩余积分 < 100 时，必须执行）
+
+报告 / 结果交付完成后，**立即**单独弹出下面这次询问，作为本条回复的收尾。优先用客户端的选项/弹框能力（如 `AskUserQuestion`）；不支持时用 1/2/3 编号列表。**不要在正文里夹带推销。**
+
+固定弹框（原样使用，不得增删改标题与选项）：
+
+- 提问：`本次运行后剩余积分不足 100，是否需要补充积分？`
+- 选项（三条，顺序固定）：
+  1. `邀请新用户并激活，获得 500 积分`——打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
+  2. `首次购买 9.9 加油包，获得 900 积分继续体验`——[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
+  3. `暂不需要`——结束本次流程，不再追问；用户下次提问时再按跑前检查重新判断。
+
+硬性规则：
+- **只弹这一问**：本条回复除本次积分三选一外不得再问任何其他问题（包括定时任务、Word、图表类型等）。客户端单条回复最多一次弹框，其余问题必须等用户答复后的下一条回复再问。
+- **不得合并、不得替换**：不能把这三个选项并进别的多选清单，也不能用别的清单顶替。
+- **不得改变顺序**：积分三选一必须紧跟交付；不得先问定时任务再回头补。触发条件成立却未弹就进入后续询问，视为流程违规。
+- 只在跑后余额 < 100 时弹；余额 ≥ 100 或查询失败时不弹。
+- 用户选 1 / 2 后，给出对应链接与一句操作说明即可，不反复推销。
+
+**与已有交付后弹框的关系**：积分充足时不弹本三选一，按本 skill 原有流程（如定时任务弹框）继续；积分不足（< 100）时，先单独弹本三选一，用户答复后，如仍适用再按原有流程询问定时任务等。两类弹框不得合并到同一次询问里。
+
+**收尾自检**：流程结束前核对跑后余额——若 < 100，确认本三选一已单独弹过；没弹即视为流程未完成。
+
 ## 性能预期
 
 查询耗时取决于穿透的基金数量和 Cue 服务端负载：
@@ -160,7 +187,7 @@ https://cuecue.cn/share/<conv_id>
 | 组合穿透（6-10 只） | 5-15 分钟 | 交叉计算量增大 |
 | 财报季（1-4月 / 7-8月） | 5-15 分钟 | 基金季报集中披露，数据源更新密集 |
 
-> 如果超过 15 分钟没返回，说明可能超时或队列拥堵——**不要取消重试**，跑一下健康检查的三合一诊断（见下文），确认服务状态后再决定是等还是换时段。中途中断时用**相同命令**续接，Cue 会从 session 断点继续，不重复计费。Session 状态存储在 `~/.cue/session/task`，**不要手动删除**。
+> 如果超过 15 分钟没返回，说明可能超时或队列拥堵——**不要取消重试**，跑一下健康检查的四合一诊断（见下文），确认服务状态后再决定是等还是换时段。中途中断时用**相同命令**续接，Cue 会从 session 断点继续，不重复计费。Session 状态存储在 `~/.cue/session/task`，**不要手动删除**。
 
 ---
 
@@ -241,14 +268,26 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 ## 健康检查
 
-跑研究前先验证三件事。一键诊断：
+跑研究前先验证四件事。一键诊断：
 
 ```bash
 CUE_KEY=$(python3 -c "import json;print(json.load(open('$HOME/.cue/config.json'))['api_key'])" 2>/dev/null || echo "$CUE_API_KEY")
-echo "=== 1/3 API Key ===" && [ -n "$CUE_KEY" ] && echo "已配置" || echo "未配置！"
-echo "=== 2/3 Cue 服务 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/health" -H "Authorization: Bearer $CUE_KEY"
-echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playbook" -H "Authorization: Bearer $CUE_KEY" | python3 -c "import sys,json;scenes=json.load(sys.stdin).get('data',{}).get('scenes',[]);buddy=[b for s in scenes for b in s.get('buddies',[]) if b.get('title')=='基金组合穿透与重复配置排雷'];print(f'可用:{len(buddy)}个') if buddy else print('暂不可用')"
+echo "=== 1/4 API Key ===" && [ -n "$CUE_KEY" ] && echo "已配置" || echo "未配置！"
+echo "=== 2/4 Cue 服务 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/health" -H "Authorization: Bearer $CUE_KEY"
+echo "=== 3/4 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playbook" -H "Authorization: Bearer $CUE_KEY" | python3 -c "import sys,json;scenes=json.load(sys.stdin).get('data',{}).get('scenes',[]);buddy=[b for s in scenes for b in s.get('buddies',[]) if b.get('title')=='基金组合穿透与重复配置排雷'];print(f'可用:{len(buddy)}个') if buddy else print('暂不可用')"
+echo "=== 4/4 剩余积分 ===" && python3 -c "
+import json, urllib.request, os
+p = os.path.expanduser('~/.cue/config.json')
+k = (json.load(open(p)).get('api_key') if os.path.exists(p) else '') or os.environ.get('CUE_API_KEY', '')
+req = urllib.request.Request('https://cuecue.cn/api/v1/billing/subscriptions/current', headers={'Authorization': 'Bearer ' + k})
+d = json.load(urllib.request.urlopen(req, timeout=10)) or {}
+d = d.get('data', d) or {}
+a = d.get('available_credits') or 0; q = d.get('permanent_credits_balance') or 0
+print('剩余积分 =', round(a + q, 2), '（可用', a, '+ 永久', q, '）')
+" 2>/dev/null || echo "积分查询失败（不阻断，继续）"
 ```
+
+> **跑前积分闸**：剩余积分 ≤ 0 时立即停止、不要开跑，按「积分不足专项提示」给出两个办法；0 < 余额 < 100 提醒偏低但可继续；查询失败不阻断。
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
@@ -260,7 +299,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 ### 配置成功后引导用户跑第一个任务（必须执行）
 
-健康检查三项全绿 = 环境就绪，但**这是配置流程的终点，不是任务的终点**。三项全绿后若用户还没给出具体任务，**必须主动把用户推向第一次真实调用**，不要停在"环境已就绪"：
+健康检查四项全绿 = 环境就绪，但**这是配置流程的终点，不是任务的终点**。四项全绿后若用户还没给出具体任务，**必须主动把用户推向第一次真实调用**，不要停在"环境已就绪"：
 
 > 环境已就绪 ✅ 下面这些都可以直接跑，比如：
 > 1. "帮我用基金组合穿透技能，分析一下我持有的 5 只基金持仓有没有重叠"
@@ -285,7 +324,7 @@ Cue 返回结构化错误，包含 `code`（错误码）、`retryable`（是否�
 | `AUTH_FAILED` | 401 / Key 无效 | ❌ | 由用户本人重新生成 Key，更新 `~/.cue/config.json` |
 | `TIMEOUT` | 超时 >30s 无响应 | ✅ | 等 5 分钟，跑诊断确认服务在线后重试，最多 3 次 |
 | `BUDDY_UNAVAILABLE` | 搭子临时下线 | ✅（延迟） | 等 1h 或网页端直接跑 |
-| `INSUFFICIENT_CREDITS` | 积分不足 | ❌ | **按「积分不足专项提示」主动引导**（充值 / 邀请好友得积分 / 等次日免费额度） |
+| `INSUFFICIENT_CREDITS` | 积分不足 | ❌ | **按「积分不足专项提示」主动引导**（邀请新用户得 500 积分 / 9.9 加油包 900 积分） |
 | `SESSION_INTERRUPTED` | 中途中断 | ✅ | **不换 prompt**，相同命令续接——Cue 从 session 断点继续，不重复计费 |
 | `FUND_NOT_FOUND` | 基金名称无法识别 | ❌（需改输入） | 检查基金全称是否正确，尝试用基金代码替代 |
 | `HOLDINGS_OUTDATED` | 最新季报尚未披露 | ❌（需等待） | 季报披露窗口（每季度结束后 15 个工作日）后再查 |
@@ -297,11 +336,11 @@ Cue 返回结构化错误，包含 `code`（错误码）、`retryable`（是否�
 检测到积分不足（`INSUFFICIENT_CREDITS` 或任何"积分不足/余额不够"提示）时，**不要只丢错误码**，必须主动给用户一条拿积分最快的路径：
 
 > 你的 Cue 积分不足，本次任务未能启动。两个办法：
-> 1. **邀请好友得 500 积分（推荐）**：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**「获取专属邀请链接」，分享给好友——好友加入后你再得 **500 积分**。
-> 2. **直接充值**：前往 [cuecue.cn/pay](https://cuecue.cn/pay) 订阅（首次充值有优惠）；或等次日免费额度。
+> 1. **邀请新用户并激活，获得 500 积分**：打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
+> 2. **首次购买 9.9 加油包，获得 900 积分继续体验**：[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
 
 规则：
-- 提示要**主动、简短、可点**——把「首页」和「左下角」两个关键动作说清楚，不要让用户自己找入口。
+- 提示要**主动、简短、可点**——把「邀请页链接」和「复制专属邀请链接」两个关键动作说清楚，不要让用户自己找入口。
 - 积分不足**不要重试**（`retryable: false`），也不要换 query 绕。
 - 用户回复已充值/已邀请后，用**完全相同的命令**重跑。
 
@@ -329,7 +368,7 @@ Cue 的调研任务是**有状态**的。如果中途超时或网络波动导致
 ├─ retryable = false → 不要重试，改了条件再说
 │   ├─ Key/基金名问题 → 修正输入后重试
 │   ├─ 季报未出 → 等披露后再查
-│   ├─ 积分不足 → 主动提示邀请链接（首页左下角）或充值或等次日
+│   ├─ 积分不足 → 按「积分不足专项提示」给出两条路径（打开 cuecue.cn/?open_reward=true 复制「专属邀请链接」）；或首次购买 9.9 加油包获得 900 积分继续体验
 │   └─ 结果空 → 换基金代码 / 缩小范围
 └─ 重试 3 次仍失败 → 记下 request_id，走降级方案
 ```
@@ -386,4 +425,4 @@ A: Cue 的调仓优化建议会给出去重方向（如"减少新能源主题基
 A: 能。交付时会附 `https://cuecue.cn/share/<conv_id>`，点开即可在网页端查看完整原文、继续追问或转发同事。
 
 **Q: 提示积分不足怎么办？**
-A: 打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**「获取专属邀请链接」分享给好友——好友加入后你再得 **500 积分**（最快）；也可以前往 [cuecue.cn/pay](https://cuecue.cn/pay) 充值（首次充值有优惠），或等次日免费额度。
+A: 打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账（推荐）；或首次购买 9.9 加油包获得 900 积分继续体验：[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。

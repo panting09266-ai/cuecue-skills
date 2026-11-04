@@ -4,7 +4,7 @@ name: cue-bidding-insight
 Name: 招投标全景透视
 description: 用 Cue 双擎互补全量扫描招投标情报——内部 MCP + 外部搜索引擎互补，自动防截断分块，物理隔离"正在招标"与"已结束"项目，补齐联系方式、溯源大额项目，帮你比竞争对手早一步发现商机。只给「一个业务关键词（可搭配时间、地区）」的批量扫描走全景透视；只要提到具体公司（如锦州石化）或具体项目，一律走自由式深度研究，绝不套用模板。
 description_zh: Cue 招投标全景透视：双擎互补全量扫描招投标情报，自动防截断，正在招标与已结束物理隔离，B端拓客与竞对监控利器；只给「一个业务关键词（可搭配时间、地区）」批量扫描，提到具体公司（如锦州石化）/具体项目一律走自由式深研，不套模板。
-version: 1.5.2
+version: 1.5.3
 author: sensedeal
 tags: [cue, bidding, procurement, lead-generation, competitive-intelligence, 招投标, 商机挖掘, 竞对监控, 政企销售, B端拓客]
 ---
@@ -193,7 +193,7 @@ tags: [cue, bidding, procurement, lead-generation, competitive-intelligence, 招
 | 8 | 原样交付；轨道 A 报告须明确标注“正在招标”和“已结束”分区；拆分交付时每份标注对应主题 | 禁止概括 |
 | 9 | 交付时**同时附带 Cue 原始报告链接** | 禁止编造链接 |
 | 10 | **交付后**：若 `credits < 200`，提醒积分已用过半 + 弹三选一分享确认框（立即一键分享／下次提醒我／否），详见「积分余额检查与分享引导」 | 余额 ≥200 或未知时不打扰；**禁止替用户决定**、禁止臆造余额 |
-| 11 | 遇 `INSUFFICIENT_CREDITS` 主动提示邀请链接 | 禁止只丢错误码 |
+| 11 | 遇 `INSUFFICIENT_CREDITS` 按「积分不足专项提示」给出两条路径 | 禁止只丢错误码 |
 | 12 | **首次成功交付报告后，用选项弹框**问是否设置定时：每个工作日 09:30（推荐）/ 每周一 09:30 / 自定义时间 / 暂不设置（见「定时任务建议」） | **禁止只发文字提醒**；**禁止未经用户选择擅自开启** |
 
 ## 核心能力
@@ -252,6 +252,33 @@ https://cuecue.cn/share/<conv_id>
 - **首次交付后**：若这是用户第一次成功跑完本 skill，按下方「定时任务建议」**用选项弹框询问**是否设置每日 / 每周定时任务，不要只发文字提醒，也不要交付完就了事。
 
 ---
+
+### 跑后余额检查（交付前必做）
+
+拿到最终结果（`RESULT ok` / 解析完成）后、交付前，复用健康检查 / 跑前积分检查里的「剩余积分」查询命令再查一次（无健康检查的 skill 用本 skill 已有的积分查询），**不轮询**；查询失败不阻断交付。记下「跑后剩余积分」：若 **< 100**，本次照常交付，交付完成后按「低余额三选一」主动引导。
+
+### 低余额三选一（跑后剩余积分 < 100 时，必须执行）
+
+报告 / 结果交付完成后，**立即**单独弹出下面这次询问，作为本条回复的收尾。优先用客户端的选项/弹框能力（如 `AskUserQuestion`）；不支持时用 1/2/3 编号列表。**不要在正文里夹带推销。**
+
+固定弹框（原样使用，不得增删改标题与选项）：
+
+- 提问：`本次运行后剩余积分不足 100，是否需要补充积分？`
+- 选项（三条，顺序固定）：
+  1. `邀请新用户并激活，获得 500 积分`——打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
+  2. `首次购买 9.9 加油包，获得 900 积分继续体验`——[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
+  3. `暂不需要`——结束本次流程，不再追问；用户下次提问时再按跑前检查重新判断。
+
+硬性规则：
+- **只弹这一问**：本条回复除本次积分三选一外不得再问任何其他问题（包括定时任务、Word、图表类型等）。客户端单条回复最多一次弹框，其余问题必须等用户答复后的下一条回复再问。
+- **不得合并、不得替换**：不能把这三个选项并进别的多选清单，也不能用别的清单顶替。
+- **不得改变顺序**：积分三选一必须紧跟交付；不得先问定时任务再回头补。触发条件成立却未弹就进入后续询问，视为流程违规。
+- 只在跑后余额 < 100 时弹；余额 ≥ 100 或查询失败时不弹。
+- 用户选 1 / 2 后，给出对应链接与一句操作说明即可，不反复推销。
+
+**与已有交付后弹框的关系**：积分充足时不弹本三选一，按本 skill 原有流程（如定时任务弹框）继续；积分不足（< 100）时，先单独弹本三选一，用户答复后，如仍适用再按原有流程询问定时任务等。两类弹框不得合并到同一次询问里。
+
+**收尾自检**：流程结束前核对跑后余额——若 < 100，确认本三选一已单独弹过；没弹即视为流程未完成。
 
 ## 积分余额检查与分享引导（每次调用必须执行）
 
@@ -396,8 +423,8 @@ fi
 
 Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-bidding-insight) 注册后免费创建。新账号送 500 积分，每天再免费送 10 分。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。
 
-- **积分赠送**：新注用户赠送 500 积分，邀请新用户再送 500 积分。
-- **积分不足**：积分用完后，前往 [cuecue.cn/pay](https://cuecue.cn/pay) 页面进行订阅。
+- **积分赠送**：新注用户赠送 500 积分；每邀请 1 位新用户注册再送 500 积分——打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
+- **积分不足**：按「积分不足专项提示」给出两条路径（邀请新用户得 500 积分 / 9.9 加油包 900 积分）。
 
 > **API Key 只能由用户本人创建**：Agent 既不能代生成、也无权查看用户的 Key。检测到未配置或失效时，按以下话术告知用户：**「点击『创建 API Key』，生成 API Key 后一定要点击『复制』并粘贴发送给我。」** 然后等待用户提供，**禁止声称"我去生成/查看"**。
 
@@ -480,14 +507,26 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 ## 健康检查
 
-跑研究前先验证三件事。一键诊断：
+跑研究前先验证四件事。一键诊断：
 
 ```bash
 CUE_KEY=$(python3 -c "import json;print(json.load(open('$HOME/.cue/config.json'))['api_key'])" 2>/dev/null || echo "$CUE_API_KEY")
-echo "=== 1/3 API Key ===" && [ -n "$CUE_KEY" ] && echo "已配置" || echo "未配置！"
-echo "=== 2/3 Cue 服务 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/health" -H "Authorization: Bearer $CUE_KEY"
-echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playbook" -H "Authorization: Bearer $CUE_KEY" | python3 -c "import sys,json;scenes=json.load(sys.stdin).get('data',{}).get('scenes',[]);buddy=[b for s in scenes for b in s.get('buddies',[]) if b.get('title')=='招投标数据全景扫描'];print(f'可用:{len(buddy)}个') if buddy else print('暂不可用')"
+echo "=== 1/4 API Key ===" && [ -n "$CUE_KEY" ] && echo "已配置" || echo "未配置！"
+echo "=== 2/4 Cue 服务 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/health" -H "Authorization: Bearer $CUE_KEY"
+echo "=== 3/4 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playbook" -H "Authorization: Bearer $CUE_KEY" | python3 -c "import sys,json;scenes=json.load(sys.stdin).get('data',{}).get('scenes',[]);buddy=[b for s in scenes for b in s.get('buddies',[]) if b.get('title')=='招投标数据全景扫描'];print(f'可用:{len(buddy)}个') if buddy else print('暂不可用')"
+echo "=== 4/4 剩余积分 ===" && python3 -c "
+import json, urllib.request, os
+p = os.path.expanduser('~/.cue/config.json')
+k = (json.load(open(p)).get('api_key') if os.path.exists(p) else '') or os.environ.get('CUE_API_KEY', '')
+req = urllib.request.Request('https://cuecue.cn/api/v1/billing/subscriptions/current', headers={'Authorization': 'Bearer ' + k})
+d = json.load(urllib.request.urlopen(req, timeout=10)) or {}
+d = d.get('data', d) or {}
+a = d.get('available_credits') or 0; q = d.get('permanent_credits_balance') or 0
+print('剩余积分 =', round(a + q, 2), '（可用', a, '+ 永久', q, '）')
+" 2>/dev/null || echo "积分查询失败（不阻断，继续）"
 ```
+
+> **跑前积分闸**：剩余积分 ≤ 0 时立即停止、不要开跑，按「积分不足专项提示」给出两个办法；0 < 余额 < 100 提醒偏低但可继续；查询失败不阻断。
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
@@ -497,7 +536,7 @@ echo "=== 3/3 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playb
 
 ### 配置成功后引导用户跑第一个任务（必须执行）
 
-健康检查三项全绿 = 环境就绪，但**这是配置流程的终点，不是任务的终点**。三项全绿后若用户还没给出具体任务，**必须主动把用户推向第一次真实调用**，不要停在"环境已就绪"：
+健康检查四项全绿 = 环境就绪，但**这是配置流程的终点，不是任务的终点**。四项全绿后若用户还没给出具体任务，**必须主动把用户推向第一次真实调用**，不要停在"环境已就绪"：
 
 > 环境已就绪 ✅ 下面这些都可以直接跑，比如：
 > 1. "帮我用招投标全景透视，扫描最近两周全国'智慧城市'相关的在招项目"
@@ -522,7 +561,7 @@ Cue 返回结构化错误，包含 `code`（错误码）、`retryable`（是否�
 | `AUTH_FAILED` | 401 / Key 无效 | ❌ | 由用户本人重新生成 Key，更新 `~/.cue/config.json` |
 | `TIMEOUT` | 超时 >30s 无响应 | ✅ | 等 5 分钟，跑诊断确认服务在线后重试，最多 3 次。若持续超时，缩小时间范围或地区范围 |
 | `BUDDY_UNAVAILABLE` | 搭子临时下线 | ✅（延迟） | 等 1h 或网页端直接跑 |
-| `INSUFFICIENT_CREDITS` | 积分不足 | ❌ | **按「积分不足专项提示」主动引导**（9.9 元加油包 990 积分 / 邀请好友双方各得 500 积分） |
+| `INSUFFICIENT_CREDITS` | 积分不足 | ❌ | **按「积分不足专项提示」主动引导**（邀请新用户得 500 积分 / 9.9 加油包 900 积分） |
 | `SESSION_INTERRUPTED` | 中途中断 | ✅ | **不换 prompt**，相同命令续接——Cue 从 session 断点继续，已扫描的窗口不重复计费 |
 | `SOURCE_PLATFORM_DOWN` | 部分招投标源平台不可达 | ✅（延迟或降级） | 换个时段重试，或接受"部分源暂不可达"的标注结果继续使用 |
 | `KEYWORD_TOO_BROAD` | 关键词太宽泛导致数据量过大 | ❌（需改条件） | 缩小关键词范围、限定地区、缩短时间窗口 |
@@ -535,11 +574,11 @@ Cue 返回结构化错误，包含 `code`（错误码）、`retryable`（是否�
 检测到积分不足（`INSUFFICIENT_CREDITS` 或任何"积分不足/余额不够"提示）时，**不要只丢错误码**，必须主动给用户一条拿积分最快的路径：
 
 > 你的 Cue 积分不足，本次任务未能启动。两个办法：
-> 1. **9.9 元加油包（推荐）**：花 **9.9 元**获得 **990 积分**，马上就能继续体验——仅此一次的活动价 → [cuecue.cn/pay](https://cuecue.cn/pay)。
-> 2. **邀请好友**：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**「获取专属邀请链接」，分享给好友——好友激活使用后，**你与好友各得 500 积分**。
+> 1. **邀请新用户并激活，获得 500 积分**：打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
+> 2. **首次购买 9.9 加油包，获得 900 积分继续体验**：[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
 
 规则：
-- 提示要**主动、简短、可点**——把「首页」和「左下角」两个关键动作说清楚，不要让用户自己找入口。
+- 提示要**主动、简短、可点**——把「邀请页链接」和「复制专属邀请链接」两个关键动作说清楚，不要让用户自己找入口。
 - 积分不足**不要重试**（`retryable: false`），也不要换 query 绕。
 - 用户回复已充值/已邀请后，用**完全相同的命令**重跑。
 
@@ -570,7 +609,7 @@ Cue 的调研任务是**有状态**的。招投标扫描因为涉及多个外部
 ├─ retryable = false → 不要重试，改了条件再说
 │   ├─ Key 问题 → 由用户本人重新生成 Key
 │   ├─ 关键词太宽 → 加限定词、缩小地区和时间
-│   ├─ 积分不足 → 主动提示邀请链接（首页左下角）或充值或等次日
+│   ├─ 积分不足 → 按「积分不足专项提示」给出两条路径（打开 cuecue.cn/?open_reward=true 复制「专属邀请链接」）；或首次购买 9.9 加油包获得 900 积分继续体验
 │   └─ 结果空 → 换关键词 / 确认该行业有公开招标习惯
 └─ 重试 3 次仍失败 → 记下 request_id，走降级方案
 ```
@@ -631,4 +670,4 @@ A: 采购方工商信息（注册资本/股东/主营业务）、项目背景（
 A: 能。交付时会同时附上 Cue 原始报告链接 `https://cuecue.cn/share/<conv_id>`，可回网页端查看完整原文、继续追问或转发同事。
 
 **Q: 提示积分不足怎么办？**
-A: 两个办法：① **9.9 元加油包（推荐）**——花 9.9 元得 **990 积分**（仅此一次的活动价），前往 [cuecue.cn/pay](https://cuecue.cn/pay) 即可继续体验；② **邀请好友**——打开 [cuecue.cn](https://cuecue.cn/)，点击页面左下角「获取专属邀请链接」，好友激活使用后**双方各得 500 积分**。积分不足不要重试。
+A: 打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账（推荐）；或首次购买 9.9 加油包获得 900 积分继续体验：[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。

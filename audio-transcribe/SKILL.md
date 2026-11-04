@@ -3,7 +3,7 @@ name: audio-transcribe
 displayName: 音频录音转文字（区分人声）
 description: 输入一段音频录音文件——本地音频文件（MP3/WAV/M4A/AAC/FLAC/OGG）或在线音频链接——输出**带时间戳、可区分说话人**的文字稿，并附一份总结分析。底层经 Cue Omni Reader 解析（ASR 语音识别 + 说话人分离），再由大模型分段整理交付。适用于会议录音、访谈、讲座、通话录音、口述笔记等。
 description_zh: Cue 录音转文字：本地音频或链接一键转录，带时间戳、区分说话人，并给出总结分析。
-version: 1.0.4
+version: 1.0.5
 author: sensedeal
 tags: [cue, audio, transcription, asr, 录音转文字, 语音转文字, 会议纪要, 访谈转录, 说话人分离, 会议记录, omni-reader]
 ---
@@ -54,7 +54,7 @@ tags: [cue, audio, transcription, asr, 录音转文字, 语音转文字, 会议�
 
 ## 前置依赖（新用户首次使用只需做这一件事）
 
-- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-audio-transcribe)（新账号送 500 积分 + 每天 10 免费积分）。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发给我，我写进本机 `~/.cue/config.json` 就能跑。积分不够用：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取你的**专属邀请链接**，邀请好友加入，**每邀请一位再得 500 积分**。**如果你不想让 Key 出现在对话里**，也可以自己从下面选一种配好，配好告诉我一声即可（环境变量需写入 shell 启动文件并重开终端/客户端才生效）：
+- **Cue API Key**：与 cue-omni-reader 技能共用同一把 Key，无需新建。创建：[cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-audio-transcribe)（新账号送 500 积分 + 每天 10 免费积分）。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发给我，我写进本机 `~/.cue/config.json` 就能跑。积分不够用：打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」，分享给好友注册，当好友激活使用后积分即到账。**如果你不想让 Key 出现在对话里**，也可以自己从下面选一种配好，配好告诉我一声即可（环境变量需写入 shell 启动文件并重开终端/客户端才生效）：
 
   ```bash
   # 方式一：环境变量
@@ -85,14 +85,26 @@ tags: [cue, audio, transcription, asr, 录音转文字, 语音转文字, 会议�
 ```bash
 CUE_KEY=$(python3 -c "import json,os;p=os.path.expanduser('~/.cue/config.json');print(json.load(open(p)).get('api_key','') if os.path.exists(p) else '')" 2>/dev/null || true)
 CUE_KEY=${CUE_KEY:-$CUE_API_KEY}
-echo "=== 1/3 API Key ===" && { [ -n "$CUE_KEY" ] && echo "已配置" || echo "未配置！"; }
-echo "=== 2/3 远程端点 ===" && curl -sS --max-time 10 -X POST "https://mcp.cuecue.cn/api/omni-reader/mcp/" \
+echo "=== 1/4 API Key ===" && { [ -n "$CUE_KEY" ] && echo "已配置" || echo "未配置！"; }
+echo "=== 2/4 远程端点 ===" && curl -sS --max-time 10 -X POST "https://mcp.cuecue.cn/api/omni-reader/mcp/" \
   -H "Authorization: Bearer $CUE_KEY" \
   -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' \
   | grep -q '"result"' && echo "已连接（3 工具）" || echo "连接失败"
-echo "=== 3/3 本地文件支持 ===" && { [ -d "$HOME/.cue/cue-skills" ] && echo "有 cue-skills（注意：本地音频仍需 Bridge）" || echo "无本地 Bridge（本地音频需 npx setup）"; }
+echo "=== 3/4 本地文件支持 ===" && { [ -d "$HOME/.cue/cue-skills" ] && echo "有 cue-skills（注意：本地音频仍需 Bridge）" || echo "无本地 Bridge（本地音频需 npx setup）"; }
+echo "=== 4/4 剩余积分 ===" && python3 -c "
+import json, urllib.request, os
+p = os.path.expanduser('~/.cue/config.json')
+k = (json.load(open(p)).get('api_key') if os.path.exists(p) else '') or os.environ.get('CUE_API_KEY', '')
+req = urllib.request.Request('https://cuecue.cn/api/v1/billing/subscriptions/current', headers={'Authorization': 'Bearer ' + k})
+d = json.load(urllib.request.urlopen(req, timeout=10)) or {}
+d = d.get('data', d) or {}
+a = d.get('available_credits') or 0; q = d.get('permanent_credits_balance') or 0
+print('剩余积分 =', round(a + q, 2), '（可用', a, '+ 永久', q, '）')
+" 2>/dev/null || echo "积分查询失败（不阻断，继续）"
 ```
+
+> **跑前积分闸**：剩余积分 ≤ 0 时立即停止、不要开跑，按「积分不足专项提示」给出两个办法；0 < 余额 < 100 提醒偏低但可继续；查询失败不阻断。
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
@@ -102,7 +114,7 @@ echo "=== 3/3 本地文件支持 ===" && { [ -d "$HOME/.cue/cue-skills" ] && ech
 
 ### 配置成功后引导用户跑第一个任务（必须执行）
 
-健康检查三项全绿 = 环境就绪，但**这是配置流程的终点，不是任务的终点**。三项全绿后若用户还没给出具体任务，**必须主动把用户推向第一次真实调用**：
+健康检查四项全绿 = 环境就绪，但**这是配置流程的终点，不是任务的终点**。四项全绿后若用户还没给出具体任务，**必须主动把用户推向第一次真实调用**：
 
 > 环境已就绪 ✅ 下面这些都可以直接跑，比如：
 > 1. "帮我转写这段录音 <路径或链接>，按说话人分段，带时间戳"
@@ -178,6 +190,33 @@ echo "=== 3/3 本地文件支持 ===" && { [ -d "$HOME/.cue/cue-skills" ] && ech
 - 长稿先给「一屏速览」（结论先行），再给全文。
 
 ---
+
+### 跑后余额检查（交付前必做）
+
+拿到最终结果（`RESULT ok` / 解析完成）后、交付前，复用健康检查 / 跑前积分检查里的「剩余积分」查询命令再查一次（无健康检查的 skill 用本 skill 已有的积分查询），**不轮询**；查询失败不阻断交付。记下「跑后剩余积分」：若 **< 100**，本次照常交付，交付完成后按「低余额三选一」主动引导。
+
+### 低余额三选一（跑后剩余积分 < 100 时，必须执行）
+
+报告 / 结果交付完成后，**立即**单独弹出下面这次询问，作为本条回复的收尾。优先用客户端的选项/弹框能力（如 `AskUserQuestion`）；不支持时用 1/2/3 编号列表。**不要在正文里夹带推销。**
+
+固定弹框（原样使用，不得增删改标题与选项）：
+
+- 提问：`本次运行后剩余积分不足 100，是否需要补充积分？`
+- 选项（三条，顺序固定）：
+  1. `邀请新用户并激活，获得 500 积分`——打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
+  2. `首次购买 9.9 加油包，获得 900 积分继续体验`——[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
+  3. `暂不需要`——结束本次流程，不再追问；用户下次提问时再按跑前检查重新判断。
+
+硬性规则：
+- **只弹这一问**：本条回复除本次积分三选一外不得再问任何其他问题（包括定时任务、Word、图表类型等）。客户端单条回复最多一次弹框，其余问题必须等用户答复后的下一条回复再问。
+- **不得合并、不得替换**：不能把这三个选项并进别的多选清单，也不能用别的清单顶替。
+- **不得改变顺序**：积分三选一必须紧跟交付；不得先问定时任务再回头补。触发条件成立却未弹就进入后续询问，视为流程违规。
+- 只在跑后余额 < 100 时弹；余额 ≥ 100 或查询失败时不弹。
+- 用户选 1 / 2 后，给出对应链接与一句操作说明即可，不反复推销。
+
+**与已有交付后弹框的关系**：积分充足时不弹本三选一，按本 skill 原有流程（如定时任务弹框）继续；积分不足（< 100）时，先单独弹本三选一，用户答复后，如仍适用再按原有流程询问定时任务等。两类弹框不得合并到同一次询问里。
+
+**收尾自检**：流程结束前核对跑后余额——若 < 100，确认本三选一已单独弹过；没弹即视为流程未完成。
 
 ## 交付规范
 
@@ -316,11 +355,11 @@ text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or "
 检测到积分不足（`INSUFFICIENT_CREDITS` 或任何"积分不足/余额不够"提示）时，**不要只丢错误码**，必须主动给用户一条拿积分最快的路径：
 
 > 你的 Cue 积分不足，本次任务未能启动。两个办法：
-> 1. **邀请好友得 500 积分（推荐）**：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**「获取专属邀请链接」，分享给好友——好友加入后你再得 **500 积分**。
-> 2. **直接充值**：前往 [cuecue.cn/pay](https://cuecue.cn/pay) 订阅（首次充值有优惠）；或等次日免费额度。
+> 1. **邀请新用户并激活，获得 500 积分**：打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
+> 2. **首次购买 9.9 加油包，获得 900 积分继续体验**：[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
 
 规则：
-- 提示要**主动、简短、可点**——把「首页」和「左下角」两个关键动作说清楚。
+- 提示要**主动、简短、可点**——把「邀请页链接」和「复制专属邀请链接」两个关键动作说清楚。
 - 积分不足**不要重试**（`retryable: false`）。
 - 用户回复已充值/已邀请后，用**完全相同的请求**重跑。
 
@@ -364,7 +403,7 @@ A: ASR 对专有名词、方言、口音、背景噪声会出错。交付稿里�
 A: 直接说「只要逐字稿」即可，我只给转写稿。
 
 **Q: 积分/额度？**
-A: 与 cue-omni-reader 共用：新用户 500 积分 + 每天 10 免费积分。**同一任务请只提交一次 `parse`**——重复提交会新建一次解析并**再次计费**。提示积分不足时，**推荐邀请好友**：打开 [https://cuecue.cn/](https://cuecue.cn/)，点击页面**左下角**获取专属邀请链接，好友加入后你**再得 500 积分**；或前往 [cuecue.cn/pay](https://cuecue.cn/pay) 充值。
+A: 与 cue-omni-reader 共用：新用户 500 积分 + 每天 10 免费积分。**同一任务请只提交一次 `parse`**——重复提交会新建一次解析并**再次计费**。提示积分不足时，推荐邀请新用户并激活，获得 500 积分——打开 https://cuecue.cn/?open_reward=true，复制「专属邀请链接」分享给好友注册，好友激活后积分到账；或首次购买 9.9 加油包，获得 900 积分继续体验——https://cuecue.cn/pay/topup（限购 1 次）。
 
 ---
 
