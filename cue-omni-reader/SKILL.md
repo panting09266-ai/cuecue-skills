@@ -45,7 +45,7 @@ tags: [cue, omni-reader, video-understanding, vision, multimodal, ocr, document-
 | 压缩包 | ZIP / RAR / TAR / GZ / TGZ / BZ2 内文件解析 |
 
 - **上限**：单文件 256 MiB，每次一个文件
-- **输出**：`markdown`（默认）/ `hypertext` / `chunks`（远程 MCP `output` 参数）；解析粒度用 `detail` 参数，当前仅 `text` 可用——`grounded`/`layout` 在远程端点报 `UNSUPPORTED_DETAIL`、本地 Bridge 报 `DETAIL_CAPABILITIES_UNAVAILABLE`
+- **输出**：`markdown`（默认）/ `hypertext` / `chunks`（远程 MCP `output` 参数）；解析粒度用 `detail` 参数：`text`（默认 Markdown）、`grounded`、`layout`。`grounded`/`layout` 在服务端广告该能力的文件与 URL 上均可用，返回 `kind: bundle` 结果；纯文本/HTML 来源可能返回 `layout.availability=unavailable`（解析器未产出版面），请求本身已成功。仅当端点未广告该能力时才 fail-closed（远程 `UNSUPPORTED_DETAIL`、本地 Bridge `DETAIL_CAPABILITIES_UNAVAILABLE`），不会静默降级
 - **隐私**：默认 `no_store=true`，源文件和解析结果不上服务端；大结果（>64 KiB）暂存本机，24h 后自动清除
 - **进度**：支持 OCR 逐页、ASR 语音转写、关键帧画面识别等阶段进度回调
 
@@ -237,12 +237,12 @@ Omni MCP 返回结构化错误，包含 `code`（错误码）、`failure_scope`�
 | `TIMEOUT` | 解析超时（>3 分钟无进度） | ✅ | 用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`**（最多 1 次，须先告知可能扣费）；仍超时则拆分文件或换时段 |
 | `NETWORK_ERROR` | 网络连接中断 | ✅ | 按退避序列（5s → 20s → 60s，不短于 `poll_after_seconds`）重试**同一个 `get_parse_status`**（复用原 operation），**不要重发 `parse`**；计入重试预算 |
 | `SERVER_OVERLOADED` | 服务端过载 | ✅（延迟） | 等 5 分钟后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`**（最多 1 次，须先告知可能扣费） |
-| `INSUFFICIENT_CREDITS` | 积分不足 | ❌ | **按「积分不足专项提示」主动引导**（邀请新用户得 500 积分 / 9.9 加油包 900 积分） |
+| `INSUFFICIENT_CREDITS` | 积分不足 | ❌ | **按「积分不足专项提示」主动引导**（邀请新用户得 500 积分 / 9.9 加油包 900 积分 / 小红书分享 200 积分） |
 | `RATE_LIMITED` | 请求频率过高 | ✅（延迟） | 等 30 秒降低频率 |
 | `REMOTE_REQUEST_REJECTED` | 远程抓取请求被拒（反爬站点 URL 经本地 Bridge 提交时常见） | ❌ | 改用远程端点提交同一 URL，见「路由规则」 |
 | `SERVICE_TEMPORARILY_UNAVAILABLE` | 解析服务临时不可用 | ✅（延迟） | 稍等后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`**（最多 1 次，须先告知可能扣费） |
-| `UNSUPPORTED_DETAIL` | 远程端点不支持 `grounded`/`layout` 细节 | ❌ | 远程仅 markdown 输出，去掉 `detail` 或改用 `text` |
-| `DETAIL_CAPABILITIES_UNAVAILABLE` | 本地 Bridge 不支持 `grounded`/`layout` 细节 | ❌ | 改用 `detail:"text"` |
+| `UNSUPPORTED_DETAIL` | 远程端点未对该来源广告 `grounded`/`layout` 能力 | ❌ | 改用 `detail:"text"`，或换用支持该能力的来源/本地 Bridge |
+| `DETAIL_CAPABILITIES_UNAVAILABLE` | 本地 Bridge 未对该来源广告 `grounded`/`layout` 能力 | ❌ | 改用 `detail:"text"`，或升级 Bridge 后重试 |
 
 > 表中所有「✅ 可重试」的等待重试，共用同一份重试预算：同一 `source` 最多 3 次状态轮询重试、总轮询 20 分钟；预算用尽转降级方案，并主动提示当前可能为使用高峰期、建议晚点再试。
 
@@ -250,9 +250,10 @@ Omni MCP 返回结构化错误，包含 `code`（错误码）、`failure_scope`�
 
 检测到积分不足（`INSUFFICIENT_CREDITS` 或任何"积分不足/余额不够"提示）时，**不要只丢错误码**，必须主动给用户一条拿积分最快的路径：
 
-> 你的 Cue 积分不足，本次任务未能启动。两个办法：
+> 你的 Cue 积分不足，本次任务未能启动。三个办法：
 > 1. **邀请新用户并激活，获得 500 积分**：打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
 > 2. **首次购买 9.9 加油包，获得 900 积分继续体验**：[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
+> 3. **分享到小红书，获得 200 积分**：[https://cuecue.cn/activity/xhs?slug=cue-omni-reader](https://cuecue.cn/activity/xhs?slug=cue-omni-reader)（按页面引导分享并领取）。
 
 规则：
 - 提示要**主动、简短、可点**——把「邀请页链接」和「复制专属邀请链接」两个关键动作说清楚，不要让用户自己找入口。
@@ -297,30 +298,31 @@ MCP 服务目录：`GET https://cuecue.cn/api/mcp-catalog`
 
 ### 跑后余额检查（交付前必做）
 
-拿到最终结果（`RESULT ok` / 解析完成）后、交付前，复用健康检查 / 跑前积分检查里的「剩余积分」查询命令再查一次（无健康检查的 skill 用本 skill 已有的积分查询），**不轮询**；查询失败不阻断交付。记下「跑后剩余积分」：若 **< 100**，本次照常交付，交付完成后按「低余额三选一」主动引导。
+拿到最终结果（`RESULT ok` / 解析完成）后、交付前，复用健康检查 / 跑前积分检查里的「剩余积分」查询命令再查一次（无健康检查的 skill 用本 skill 已有的积分查询），**不轮询**；查询失败不阻断交付。记下「跑后剩余积分」：若 **< 100**，本次照常交付，交付完成后按「低余额四选一」主动引导。
 
-### 低余额三选一（跑后剩余积分 < 100 时，必须执行）
+### 低余额四选一（跑后剩余积分 < 100 时，必须执行）
 
-报告 / 结果交付完成后，**立即**单独弹出下面这次询问，作为本条回复的收尾。优先用客户端的选项/弹框能力（如 `AskUserQuestion`）；不支持时用 1/2/3 编号列表。**不要在正文里夹带推销。**
+报告 / 结果交付完成后，**立即**单独弹出下面这次询问，作为本条回复的收尾。优先用客户端的选项/弹框能力（如 `AskUserQuestion`）；不支持时用 1/2/3/4 编号列表。**不要在正文里夹带推销。**
 
 固定弹框（原样使用，不得增删改标题与选项）：
 
 - 提问：`本次运行后剩余积分不足 100，是否需要补充积分？`
-- 选项（三条，顺序固定）：
+- 选项（四条，顺序固定）：
   1. `邀请新用户并激活，获得 500 积分`——打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
   2. `首次购买 9.9 加油包，获得 900 积分继续体验`——[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
+  3. `分享到小红书，获得 200 积分`——点击 [https://cuecue.cn/activity/xhs?slug=cue-omni-reader](https://cuecue.cn/activity/xhs?slug=cue-omni-reader)（按页面引导分享并领取 200 积分）。
   3. `暂不需要`——结束本次流程，不再追问；用户下次提问时再按跑前检查重新判断。
 
 硬性规则：
-- **只弹这一问**：本条回复除本次积分三选一外不得再问任何其他问题（包括定时任务、Word、图表类型等）。客户端单条回复最多一次弹框，其余问题必须等用户答复后的下一条回复再问。
-- **不得合并、不得替换**：不能把这三个选项并进别的多选清单，也不能用别的清单顶替。
-- **不得改变顺序**：积分三选一必须紧跟交付；不得先问定时任务再回头补。触发条件成立却未弹就进入后续询问，视为流程违规。
+- **只弹这一问**：本条回复除本次积分四选一外不得再问任何其他问题（包括定时任务、Word、图表类型等）。客户端单条回复最多一次弹框，其余问题必须等用户答复后的下一条回复再问。
+- **不得合并、不得替换**：不能把这四个选项并进别的多选清单，也不能用别的清单顶替。
+- **不得改变顺序**：积分四选一必须紧跟交付；不得先问定时任务再回头补。触发条件成立却未弹就进入后续询问，视为流程违规。
 - 只在跑后余额 < 100 时弹；余额 ≥ 100 或查询失败时不弹。
-- 用户选 1 / 2 后，给出对应链接与一句操作说明即可，不反复推销。
+- 用户选 1 / 2 / 3 后，给出对应链接与一句操作说明即可，不反复推销。
 
-**与已有交付后弹框的关系**：积分充足时不弹本三选一，按本 skill 原有流程（如定时任务弹框）继续；积分不足（< 100）时，先单独弹本三选一，用户答复后，如仍适用再按原有流程询问定时任务等。两类弹框不得合并到同一次询问里。
+**与已有交付后弹框的关系**：积分充足时不弹本四选一，按本 skill 原有流程（如定时任务弹框）继续；积分不足（< 100）时，先单独弹本四选一，用户答复后，如仍适用再按原有流程询问定时任务等。两类弹框不得合并到同一次询问里。
 
-**收尾自检**：流程结束前核对跑后余额——若 < 100，确认本三选一已单独弹过；没弹即视为流程未完成。
+**收尾自检**：流程结束前核对跑后余额——若 < 100，确认本四选一已单独弹过；没弹即视为流程未完成。
 
 ## 格式转换
 
@@ -381,7 +383,7 @@ print('剩余积分 =', round(a + q, 2), '（可用', a, '+ 永久', q, '）')
 " 2>/dev/null || echo "积分查询失败（不阻断，继续）"
 ```
 
-> **跑前积分闸**：剩余积分 ≤ 0 时立即停止、不要开跑，按「积分不足专项提示」给出两个办法；0 < 余额 < 100 提醒偏低但可继续；查询失败不阻断。
+> **跑前积分闸**：剩余积分 ≤ 0 时立即停止、不要开跑，按「积分不足专项提示」给出三个办法；0 < 余额 < 100 提醒偏低但可继续；查询失败不阻断。
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
@@ -448,7 +450,7 @@ npx -y @cueai/omni-reader-mcp@1.8.6 doctor --silent-check
 | Agent 说连不上 Omni | MCP 服务是否正常运行 | 跑健康检查三段诊断 |
 | 等很久没反应 | 大文件或高峰期 | 先跑诊断确认服务在线；超 15 分钟则**用原 `operation_id` 轮询 `get_parse_status`**（**不要重发 `parse`**） |
 | 解析结果看起来缺内容 | 复杂排版/跨页切分 | 换 `hypertext` 输出，或分页解析 |
-| 视频解析只有字幕没有画面描述 | 输出模式 | `detail:"text"` 的结果已含关键帧画面文字（`[画面 mm:ss]` 标注）；`grounded`/`layout` 当前远程与本地均不可用（分别报 `UNSUPPORTED_DETAIL` / `DETAIL_CAPABILITIES_UNAVAILABLE`），勿再尝试；远程可试 `output: "hypertext"` |
+| 视频解析只有字幕没有画面描述 | 输出模式 | `detail:"text"` 的结果已含关键帧画面文字（`[画面 mm:ss]` 标注）；需要更强的画面结构可尝试 `detail:"grounded"` 或 `"layout"`（是否产出版面取决于来源能力，纯字幕源可能返回 `layout.availability=unavailable`）；远程也可试 `output: "hypertext"` |
 | oss:// 链接报错 | 裸 oss URL | 先转换为签名 HTTPS URL 再传 |
 | 已经在对话里发了文件但还是报错 | 文件路径未传递 | 在对话中明确输入文件路径，如 `./report.pdf` |
 
@@ -483,7 +485,7 @@ Cue Omni Reader 长时间不可达时的手动替代渠道：
 A: 安装前会征得用户确认。Bridge 仅访问用户指定的文件/目录，不会扫描其他位置。本地模式下文件不经过 Cue 服务端，默认 `no_store=true`。
 
 **Q: 解析失败了怎么办？**
-A: MCP 返回结构化错误（含错误码、失败范围、是否可重试、用户操作建议），根据错误类型即可判断——超时可**用原 `operation_id` 轮询 `get_parse_status` 复用**（**不要重发 `parse`**）、格式不支持则转换、积分不足则按「积分不足专项提示」给出两条路径（邀请新用户得 500 积分 / 9.9 加油包 900 积分）。
+A: MCP 返回结构化错误（含错误码、失败范围、是否可重试、用户操作建议），根据错误类型即可判断——超时可**用原 `operation_id` 轮询 `get_parse_status` 复用**（**不要重发 `parse`**）、格式不支持则转换、积分不足则按「积分不足专项提示」给出补充路径（邀请新用户得 500 积分 / 9.9 加油包 900 积分 / 小红书分享 200 积分）。
 
 **Q: 解析出来的表格是 HTML 源码（`<table>`）看不懂？**
 A: 交付前应先把 HTML 表格转成 Markdown 表格（管道符形式）。需要 Excel / Word / PDF 时，用 pandoc 把 Markdown 转成 docx/pdf，或用 pandas 生成 `.xlsx`。
@@ -503,7 +505,7 @@ A: 看你要什么。只要**原始文字稿 / 字幕 / 画面文字**，用本 
 **Q: 支持哪些文件类型？**
 A: PDF / Word / Excel / PPT / 图片（PNG/JPG/BMP/GIF/WebP/HEIC/AVIF）/ 音频（MP3/WAV/M4A/AAC/FLAC/OGG）/ 视频（MP4/MOV/MKV/WebM/AVI/M4V）/ 网页 / 文本与代码（TXT/MD/JSON/YAML/TOML/XML/CSV/TSV/INI/LOG/Parquet）/ 压缩包（ZIP/RAR/TAR/GZ/TGZ/BZ2）。
 
-**Q: 提示积分不足怎么办？** A: 两个办法。**推荐邀请好友**：打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」，分享给好友注册，当好友激活使用后积分即到账；或首次购买 9.9 加油包获得 900 积分继续体验：[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
+**Q: 提示积分不足怎么办？** A: 三个办法。**推荐邀请好友**：打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」，分享给好友注册，当好友激活使用后积分即到账；或首次购买 9.9 加油包获得 900 积分继续体验：[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）；或分享到小红书，获得 200 积分——[https://cuecue.cn/activity/xhs?slug=cue-omni-reader](https://cuecue.cn/activity/xhs?slug=cue-omni-reader)（按页面引导分享并领取）。
 
 ---
 
