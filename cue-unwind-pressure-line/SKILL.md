@@ -2,7 +2,7 @@
 name: cue-unwind-pressure-line
 description: 用 Cue 帮你看清被套的股票上方还有哪几道坎——从筹码分布定位套牢盘、用均线校验阻力强度、推演反弹每一步需要的量能，产出可复核的解套压力线底稿，辅助判断反弹到哪容易卡住、哪里该减仓。
 description_zh: Cue 解套压力线：筹码分布/套牢盘分区/均线共振阻力/反弹量能，产出可复核的解套压力位底稿。
-version: 1.0.2
+version: 1.0.3
 author: sensedeal
 tags: [cue, unwind, resistance, chip-distribution, 解套, 套牢, 压力位, 阻力位, 筹码分布, 短线分析]
 ---
@@ -15,14 +15,33 @@ tags: [cue, unwind, resistance, chip-distribution, 解套, 套牢, 压力位, �
 
 | 顺序 | 做什么 | 禁止 |
 |------|--------|------|
-| 1 | 确认 Cue runner 就绪 | 禁止跳过 |
+| 1 | **确认 API Key 已配置 + Cue runner 就绪**（未配置先按步骤 0 引导创建） | 禁止跳过 |
 | 2 | 告知用户耗时 2-15 分钟 | 禁止中途取消 |
 | 3 | 一条命令，`--template-id template_DqWlqH`，传入目标股票 | 禁止连发多条 |
 | 4 | `[cue-research] RESULT ok` = 完成 | 禁止编造 |
 | 5 | 原样交付，来源链接不丢失 | 禁止概括/改数字 |
 | 6 | 交付时**同时附带 Cue 原始报告链接** | 禁止编造链接 |
-| 7 | 遇 `INSUFFICIENT_CREDITS` 按「积分不足专项提示」给出两条路径 | 禁止只丢错误码 |
+| 7 | 遇 `INSUFFICIENT_CREDITS` 主动弹出「低余额四选一」 | 禁止只丢错误码 |
 | 8 | 交付后**用选项弹框**问是否设置定时：每个交易日 16:30（推荐，落在 16:00–17:00 收盘后窗口）/ 自定义时间 / 暂不设置 | 禁止只发文字提醒；禁止未经用户选择擅自开启；禁止错绑标的 |
+
+### 步骤 0：接入与装配 + 首任务引导（任何任务之前，必须最先执行）
+
+开跑任何任务前，先确认 API Key 已就绪：
+
+1. **检查 Key**：`~/.cue/config.json` 的 `api_key`（或环境变量 `CUE_API_KEY`）是否有值。
+2. **未配置 / 失效**：**停止任务**，由用户本人创建（Agent 不能代生成、无权查看）。按以下话术告知：
+   > 请前往 [cuecue.cn](https://cuecue.cn/api-key?src=github-unwind-pressure-line) 注册后免费创建 API Key，点击「创建 API Key」，生成后点「复制」并粘贴发送给我。
+   拿到 Key 后写入 `~/.cue/config.json`；若本 skill 依赖 MCP 工具，按对应小节完成挂载并提示重启客户端。
+3. **健康检查全绿后**，若用户还没给出具体任务，**必须主动引导第一次真实调用**，不要停在"环境已就绪"：
+   > 环境已就绪 ✅ 下面这些都可以直接跑，比如：
+   > 1. "我被套在 62 块，帮我看看沪电股份上方还有几道坎？"
+   > 2. "宁德时代这波反弹能过前高吗，上面套牢盘重不重？"
+   >
+   > 挑一个发给我，或直接把你手头的需求告诉我，我现在就跑。
+
+规则：
+- **主动、可复制**——示例问题用本 skill 示例小节的原文，别只写"你可以问我任何问题"。
+- **不要等用户自己想**——用户没开口时也要主动给；否则用户会停在"验证通过"就散场（实测这是新用户流失最集中的一步）。
 
 ## 适用场景
 
@@ -83,30 +102,38 @@ https://cuecue.cn/share/<conv_id>
 
 ### 跑后余额检查（交付前必做）
 
-拿到最终结果（`RESULT ok` / 解析完成）后、交付前，复用健康检查 / 跑前积分检查里的「剩余积分」查询命令再查一次（无健康检查的 skill 用本 skill 已有的积分查询），**不轮询**；查询失败不阻断交付。记下「跑后剩余积分」：若 **< 100**，本次照常交付，交付完成后按「低余额三选一」主动引导。
+拿到最终结果（`RESULT ok` / 解析完成）后、交付前，复用健康检查 / 跑前积分检查里的「剩余积分」查询命令再查一次（无健康检查的 skill 用本 skill 已有的积分查询），**不轮询**；查询失败不阻断交付。记下「跑后剩余积分」：若 **< 100**，本次照常交付，交付完成后按「低余额四选一」主动引导。
 
-### 低余额三选一（跑后剩余积分 < 100 时，必须执行）
+### 低余额四选一（跑后剩余积分 < 100 时，必须执行）
 
-报告 / 结果交付完成后，**立即**单独弹出下面这次询问，作为本条回复的收尾。优先用客户端的选项/弹框能力（如 `AskUserQuestion`）；不支持时用 1/2/3 编号列表。**不要在正文里夹带推销。**
+报告 / 结果交付完成后，**立即**单独弹出下面这次询问，作为本条回复的收尾。优先用客户端的选项/弹框能力（如 `AskUserQuestion`）；不支持时用 1/2/3/4 编号列表。**不要在正文里夹带推销。**
 
 固定弹框（原样使用，不得增删改标题与选项）：
 
 - 提问：`本次运行后剩余积分不足 100，是否需要补充积分？`
-- 选项（三条，顺序固定）：
+- 选项（四条，顺序固定）：
   1. `邀请新用户并激活，获得 500 积分`——打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
   2. `首次购买 9.9 加油包，获得 900 积分继续体验`——[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
-  3. `暂不需要`——结束本次流程，不再追问；用户下次提问时再按跑前检查重新判断。
+  3. `分享到小红书，获得 200 积分`——点击 https://cuecue.cn/activity/xhs?conversation_id={{conv_id}}&skill_name=解套压力线（筹码阻力）（把 `{{conv_id}}` 替换为本次报告的 id，见下）
+  4. `暂不需要`——结束本次流程，不再追问；用户下次提问时再按跑前检查重新判断。
+
+**小红书分享链接怎么拼（第 3 项）**：
+- 固定格式：`https://cuecue.cn/activity/xhs?conversation_id=<conv_id>&skill_name=解套压力线（筹码阻力）`
+- `conversation_id` = 本次交付报告对应的 Cue 报告 id（交付时 Cue 报告链接 `https://cuecue.cn/share/<conv_id>` 里的同一串 id），必须来自实际输出，禁止编造。
+- `skill_name` 固定为 `解套压力线（筹码阻力）`，不得改写。
+- 本次无有效 `conv_id`（如 `RESULT empty`）时，不展示第 3 项、不编造参数，只给其余三项。
+- 用户选择后发送拼好的完整链接，提示按页面引导分享并领取 200 积分。
 
 硬性规则：
-- **只弹这一问**：本条回复除本次积分三选一外不得再问任何其他问题（包括定时任务、Word、图表类型等）。客户端单条回复最多一次弹框，其余问题必须等用户答复后的下一条回复再问。
-- **不得合并、不得替换**：不能把这三个选项并进别的多选清单，也不能用别的清单顶替。
-- **不得改变顺序**：积分三选一必须紧跟交付；不得先问定时任务再回头补。触发条件成立却未弹就进入后续询问，视为流程违规。
+- **只弹这一问**：本条回复除本次积分四选一外不得再问任何其他问题（包括定时任务、Word、图表类型等）。客户端单条回复最多一次弹框，其余问题必须等用户答复后的下一条回复再问。
+- **不得合并、不得替换**：不能把这四个选项并进别的多选清单，也不能用别的清单顶替。
+- **不得改变顺序**：积分四选一必须紧跟交付；不得先问定时任务再回头补。触发条件成立却未弹就进入后续询问，视为流程违规。
 - 只在跑后余额 < 100 时弹；余额 ≥ 100 或查询失败时不弹。
-- 用户选 1 / 2 后，给出对应链接与一句操作说明即可，不反复推销。
+- 用户选 1 / 2 / 3 后，给出对应链接与一句操作说明即可，不反复推销。
 
-**与已有交付后弹框的关系**：积分充足时不弹本三选一，按本 skill 原有流程（如定时任务弹框）继续；积分不足（< 100）时，先单独弹本三选一，用户答复后，如仍适用再按原有流程询问定时任务等。两类弹框不得合并到同一次询问里。
+**与已有交付后弹框的关系**：积分充足时不弹本四选一，按本 skill 原有流程（如定时任务弹框）继续；积分不足（< 100）时，先单独弹本四选一，用户答复后，如仍适用再按原有流程询问定时任务等。两类弹框不得合并到同一次询问里。
 
-**收尾自检**：流程结束前核对跑后余额——若 < 100，确认本三选一已单独弹过；没弹即视为流程未完成。
+**收尾自检**：流程结束前核对跑后余额——若 < 100，确认本四选一已单独弹过；没弹即视为流程未完成。
 
 ## 定时任务（交付后必做：弹框询问）
 
@@ -150,36 +177,24 @@ python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
   --output ~/cue-reports/$(date +%Y-%m-%d-%H%M)-unwind-pressure-line.md
 ```
 
-按运行环境选一种落地方式：
+优先用运行环境自带的定时能力（如 Claude Code 的定时任务功能，按交易日 16:30 设置）。若当前客户端不支持定时任务，则把上面的命令和推荐时间交给用户，由用户自行在系统日历 / 提醒中添加；**Agent 不代替用户修改系统级配置**。
 
-| 环境 | 配置方式 |
-|------|---------|
-| Claude Code | 用 `CronCreate`，cron 表达式 `30 16 * * 1-5`（自定义时间按用户所选取 分 时 日 月 周） |
-| macOS | 建 `~/Library/LaunchAgents/com.cue.unwind-pressure-line.plist`，`StartCalendarInterval` 设 `Weekday` 1–5、`Hour` 16、`Minute` 30，再 `launchctl load` |
-| Linux | `crontab -e` 追加 `30 16 * * 1-5 <上面的命令>` |
-
-配完必须回报三件事：**触发时间、绑定标的、如何关掉**（Claude Code 删任务 / `launchctl unload` / `crontab -e` 删除对应行）。
+配完必须回报三件事：**触发时间、绑定标的、如何关掉**。
 
 ### 必须提前告知的两个坑
 
-- **每次运行都会消耗 Cue 积分**，盯多只股票按任务数叠加，余额不足时当天会失败，需按「积分不足专项提示」补充积分，不会自动跳过。
+- **每次运行都会消耗 Cue 积分**，盯多只股票按任务数叠加，余额不足时当天会失败，需按「低余额四选一」补充积分，不会自动跳过。
 - **定时任务不会自动推送**：报告只落盘 `~/cue-reports/*.md`，需要自己打开看；看板可在次日交互时基于已落盘的 `.md` 补生成（纯本地操作，不消耗积分）。
 
 ---
 
 ## 环境要求
 
-**首次使用运行 skill 自带的一键安装脚本**（检查依赖 → 克隆 runner → 验证 Key → 测试连通性）：
-
-```bash
-```
-
-依赖：`git` + `python3` + `curl`。Python 仅用标准库，无额外 pip 依赖。
+运行依赖：`git` + `python3` + `curl`（macOS / Linux 通常已自带）。Python 仅用标准库。
 
 Cue API Key：[cuecue.cn](https://cuecue.cn/api-key?src=github-unwind-pressure-line) 注册后免费创建。点击「创建 API Key」，生成 API Key 后一定要点击「复制」并粘贴发送给您正在使用的智能体。
 
-- **积分赠送**：新注用户赠送 500 积分；每邀请 1 位新用户注册再送 500 积分——打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
-- **积分不足**：按「积分不足专项提示」给出两条路径（邀请新用户得 500 积分 / 9.9 加油包 900 积分）。
+- 新注册即获赠积分；积分不足时的补充方式见下文「低余额四选一」。
 
 Runner 来源：[GitHub - sensedeal/cue-skills](https://github.com/sensedeal/cue-skills)（[Gitee 镜像](https://gitee.com/sensedeal/cue-skills)）。
 
@@ -217,24 +232,7 @@ python3 ~/.cue/cue-skills/cue-research/scripts/research_run.py \
 
 ## 格式转换
 
-Cue 输出 Markdown。安装 pandoc 后可转换为 Word 或 PDF：
-
-```bash
-# .md → .docx（Word）
-pandoc report.md -o report.docx
-
-# .md → .pdf
-pandoc report.md -o report.pdf --pdf-engine=xelatex
-```
-
-输出文件与输入同目录、同名、不同后缀。
-
-### 依赖安装
-
-| 目标格式 | 依赖 | macOS | Ubuntu |
-|----------|------|-------|--------|
-| Word (.docx) | pandoc | `brew install pandoc` | `sudo apt install pandoc` |
-| PDF (.pdf) | pandoc + LaTeX | `brew install --cask basictex` | `sudo apt install texlive-xetex` |
+Cue 输出 Markdown。如用户需要 Word / PDF，可自行用已有工具转换（可选，非本 skill 必需）。输出文件与输入同目录、同名、不同后缀。
 
 ---
 
@@ -244,7 +242,7 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 
 | 环节 | 谁控制 | 出问题时 |
 |------|--------|---------|
-| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/hub/api-key](https://cuecue.cn/api-key?src=github-unwind-pressure-line) 生成后点「复制」并粘贴发送给您正在使用的智能体，再由 Agent 写入 ~/.cue/config.json（Agent 不能代生成，也无权查看） |
+| API Key 鉴权 | 用户本人 | **由用户本人**前往 [cuecue.cn/api-key](https://cuecue.cn/api-key) 生成后点「复制」并粘贴发送给您正在使用的智能体，由 runner 保存到本地配置（Agent 不能代生成，也无权查看） |
 | Cue 服务端 | Cue 运维 | 等恢复，或走降级方案 |
 | 外部数据源 | 公开网站 | Cue 用缓存兜底，标注"来源暂不可达" |
 
@@ -255,14 +253,14 @@ pandoc report.md -o report.pdf --pdf-engine=xelatex
 跑研究前先验证四件事。一键诊断：
 
 ```bash
-CUE_KEY=$(python3 -c "import json;print(json.load(open('$HOME/.cue/config.json'))['api_key'])" 2>/dev/null || echo "$CUE_API_KEY")
+CUE_KEY=$(python3 -c "import json;print(json.load(open('$HOME/.cue/config.json'))['api_key'])" 2>/dev/null)
 echo "=== 1/4 API Key ===" && [ -n "$CUE_KEY" ] && echo "已配置" || echo "未配置！"
 echo "=== 2/4 Cue 服务 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/health" -H "Authorization: Bearer $CUE_KEY"
 echo "=== 3/4 搭子 ===" && curl -sS --max-time 10 "https://cuecue.cn/api/playbook" -H "Authorization: Bearer $CUE_KEY" | python3 -c "import sys,json;scenes=json.load(sys.stdin).get('data',{}).get('scenes',[]);buddy=[b for s in scenes if s.get('secondary_category')=='短线盘面' for b in s.get('buddies',[]) if b.get('title')=='个股短线筹码阻力穿透'];print(f'可用:{len(buddy)}个') if buddy else print('暂不可用')"
 echo "=== 4/4 剩余积分 ===" && python3 -c "
 import json, urllib.request, os
 p = os.path.expanduser('~/.cue/config.json')
-k = (json.load(open(p)).get('api_key') if os.path.exists(p) else '') or os.environ.get('CUE_API_KEY', '')
+k = json.load(open(p)).get('api_key') if os.path.exists(p) else ''
 req = urllib.request.Request('https://cuecue.cn/api/v1/billing/subscriptions/current', headers={'Authorization': 'Bearer ' + k})
 d = json.load(urllib.request.urlopen(req, timeout=10)) or {}
 d = d.get('data', d) or {}
@@ -271,7 +269,7 @@ print('剩余积分 =', round(a + q, 2), '（可用', a, '+ 永久', q, '）')
 " 2>/dev/null || echo "积分查询失败（不阻断，继续）"
 ```
 
-> **跑前积分闸**：剩余积分 ≤ 0 时立即停止、不要开跑，按「积分不足专项提示」给出两个办法；0 < 余额 < 100 提醒偏低但可继续；查询失败不阻断。
+> **跑前积分闸**：剩余积分 ≤ 0 时立即停止、不要开跑，按「低余额四选一」引导；0 < 余额 < 100 提醒偏低但可继续；查询失败不阻断。
 
 | 检查 | 预期 | 异常处理 |
 |------|------|---------|
@@ -279,19 +277,7 @@ print('剩余积分 =', round(a + q, 2), '（可用', a, '+ 永久', q, '）')
 | 服务 | `{"status":"healthy"}` | 等 5 分钟重试 |
 | 搭子 | `可用:>0个` | 等 1h 或网页端手动跑 |
 
-### 配置成功后引导用户跑第一个任务（必须执行）
-
-健康检查四项全绿 = 环境就绪，但**这是配置流程的终点，不是任务的终点**。四项全绿后若用户还没给出具体任务，**必须主动把用户推向第一次真实调用**，不要停在"环境已就绪"：
-
-> 环境已就绪 ✅ 下面这些都可以直接跑，比如：
-> 1. "我被套在 62 块，帮我看看沪电股份上方还有几道坎？"
-> 2. "宁德时代这波反弹能过前高吗，上面套牢盘重不重？"
->
-> 挑一个发给我，或直接把你手头的需求告诉我，我现在就跑。
-
-规则：
-- **主动、可复制**——示例问题原句取自上文「试试这样问」，别只写"你可以问我任何问题"。
-- **不要等用户自己想**——用户没开口时也要主动给；否则用户会停在"验证通过"就散场（实测这是新用户流失最集中的一步）。
+> 配置完成后的首次调用引导已并入「步骤 0：接入与装配 + 首任务引导」，按该节执行。
 
 ---
 
@@ -304,18 +290,14 @@ print('剩余积分 =', round(a + q, 2), '（可用', a, '+ 永久', q, '）')
 | 401 / Key 无效 | Key 过期或写错 | 由用户本人重新生成 Key，更新 `~/.cue/config.json` |
 | 超时 >30s | 服务维护/过载 | 等 5 分钟，跑诊断；当天内重试 |
 | 搭子不可用 | 临时下线 | 网页端直接跑，或等 1 小时 |
-| 积分不足 | 余额 < 消耗 | **按「积分不足专项提示」主动引导**（邀请新用户得 500 积分 / 9.9 加油包 900 积分） |
+| 积分不足 | 余额 < 消耗 | **按「低余额四选一」主动引导** |
 | 中途中断 | 队列满/数据源波动 | **不换 prompt**，相同命令续接 |
 | `RESULT empty` | 公开源无匹配 | 缩小范围，换关键词 |
 | config.json 报错 | JSON 格式不对 | `{"api_key": "sk..."}` 无多余逗号 |
 
 ### 积分不足专项提示（必须执行）
 
-检测到积分不足（`INSUFFICIENT_CREDITS` 或任何"积分不足/余额不够"提示）时，**不要只丢错误码**，必须主动给用户一条拿积分最快的路径：
-
-> 你的 Cue 积分不足，本次任务未能启动。两个办法：
-> 1. **邀请新用户并激活，获得 500 积分**：打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账。
-> 2. **首次购买 9.9 加油包，获得 900 积分继续体验**：[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
+检测到积分不足（`INSUFFICIENT_CREDITS` 或任何"积分不足/余额不够"提示）时，**不要只丢错误码**：按上文「低余额四选一」原样弹出四个选项（邀请新用户得 500 / 9.9 加油包得 900 / 小红书分享得 200 / 暂不需要）；若本次尚未生成报告、没有 `conv_id`，则跳过小红书项，不要编造参数。
 
 规则：
 - 提示要**主动、简短、可点**——把「邀请页链接」和「复制专属邀请链接」两个关键动作说清楚，不要让用户自己找入口。
@@ -378,7 +360,7 @@ A: 以日线为主，默认近半年窗口；可在 query 中指定（如"近 3 
 A: 可以。交付时会同时附上 Cue 原始报告链接 `https://cuecue.cn/share/<conv_id>`，点开即可回到网页端查看完整原文、继续追问或转发同事。
 
 **Q: 提示积分不足怎么办？**
-A: 打开 [https://cuecue.cn/?open_reward=true](https://cuecue.cn/?open_reward=true)，复制「专属邀请链接」分享给好友注册，当好友激活使用后积分即到账（推荐）；或首次购买 9.9 加油包获得 900 积分继续体验：[https://cuecue.cn/pay/topup](https://cuecue.cn/pay/topup)（限购 1 次）。
+A: 按上文「低余额四选一」处理：邀请新用户并激活得 500 积分，或首次购买 9.9 加油包得 900 积分。
 
 ## 参考
 
