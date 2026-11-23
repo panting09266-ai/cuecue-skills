@@ -3,7 +3,7 @@ name: bilibili-video-studio
 displayName: B站视频全解析
 description: B站视频一站式解析与创作工场。用户直接输入 B 站视频 URL 加一句简单要求即可：视频转文字（字幕/口播/画面内容）、内容分析总结、爆款视频拆解（按带货/流量逻辑拆结构分段、脚本类型、爆款归因、六维评分报告，照着学照着抄）、视频转脚本（镜头/运镜/转场/情绪/时间线/屏幕文字）、爆款脚本生成（原骨架改写成你的脚本，或按方向/目的/商品原创口播脚本，含分段表与六维质检评分）、视频提示词反推（画面和内容转成 agent 可理解的提示词）、视频提取 PPT 内容（关键帧文字+幻灯OCR+完整口播稿）、备考笔记整理（题库/考点/带背视频按题号+标准答案重组）。底层经 Cue Omni Reader 远程端点解析（自动绕过 B 站反爬），再由大模型按场景加工交付。
 description_zh: B站视频全解析：URL 直达，转文字/分析总结/爆款拆解六维评分/转脚本/脚本生成/提示词反推/PPT提取/备考笔记，八大场景全覆盖。
-version: 1.2.5
+version: 1.2.6
 author: sensedeal
 tags: [bilibili, video, 爆款拆解, 脚本生成, 视频转文字, 提示词反推, ppt提取, 备考笔记, omni-reader, 内容创作, 带货, 口播]
 ---
@@ -152,6 +152,8 @@ print('剩余积分 =', round(a + q, 2), '（可用', a, '+ 永久', q, '）')
 - **时长预判**：≤30 分钟单条视频直接提交；超长/多 P 引导用户按分P解析（单个分P 是短视频，页面 URL 通常能过），不要整条提交。
 
 ### 步骤 1：提交解析（远程端点）
+
+> **`processing` ≠ 失败（硬规则）**：首包返回 `status: processing`（部分客户端外层还带 `ok:false`）只代表任务已受理、正在解析，**不是失败**。必须拿着同一个 `operation_id` 继续调 `get_parse_status`，直到 `status=completed`；`fetching` / `queued` / 超时都继续轮询，不要重发 `parse`。
 
 告知用户等待时长后，调用 `parse`（参考实现见「解析调用手册」）。返回 `{"status":"processing","operation_id":"op_..."}`，记下 `operation_id`。
 
@@ -459,16 +461,26 @@ def call(name, args, timeout=70):
             raise RuntimeError(json.dumps(r.get("error","unknown"), ensure_ascii=False))
     raise RuntimeError("无响应")
 
-st = call("parse", {"source": url, "detail": "text"})     # 唯一一次提交，之后绝不再调 parse
-op  = st.get("operation_id")
-deadline = time.time() + 1200                              # 轮询上限 20 分钟，避免无限等待
-while st.get("status") == "processing" and time.time() < deadline:
+STOP = {"completed", "failed", "cancelled", "canceled"}
+
+# 提交前输入校验：CDN 直链 / 中转链接不稳定，改用平台页面链接
+if url.startswith(("http://", "https://")) and any(h in url for h in ("bilivideo.com", "wy-relay.app.workbuddy.host")):
+    raise ValueError("直链/中转链接无法稳定解析，请改用页面链接（如 https://www.bilibili.com/video/BVxxxx/）")
+
+st = call("parse", {"source": url, "detail": "text"})     # 唯一一次提交
+op = st.get("operation_id")
+if not op:                                                 # 提交即失败（如 SERVICE_TEMPORARILY_UNAVAILABLE / UNSUPPORTED_SOURCE）
+    raise RuntimeError(f"提交未建立任务: {st}")
+deadline = time.time() + 1200                              # 轮询上限 20 分钟
+while str(st.get("status", "")).lower() not in STOP and time.time() < deadline:
     time.sleep(min(st.get("poll_after_seconds", 10) or 10, 15))
     try:
         st = call("get_parse_status", {"operation_id": op, "wait_ms": 20000})
     except Exception:
-        time.sleep(5)                                      # 网络抖动 → 重试状态查询，绝不重发 parse
+        time.sleep(5)                                      # 网络抖动只重试 get_parse_status，绝不重发 parse
         continue
+if str(st.get("status", "")).lower() != "completed":
+    raise RuntimeError(f"解析未完成 (operation_id={op}): {st}")
 r = st.get("result")
 text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or ""
 ```
