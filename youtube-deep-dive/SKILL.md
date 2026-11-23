@@ -3,7 +3,7 @@ name: youtube-deep-dive
 displayName: YouTube 视频深度解析
 description: 输入一个 YouTube 视频链接，输出**带时间戳**的完整文字稿——口播 ASR（区分说话人）+ 关键帧画面文字与视觉要点——并附一份深度总结分析（主旨、结构大纲、核心要点、金句、提到的书/人名/数据/工具）。底层经 Cue Omni Reader 远程端点解析（ASR + 关键帧视觉理解，自动绕过平台反爬），再由大模型整理概括交付。
 description_zh: Cue YouTube 视频深度解析：链接直达，带时间戳的口播+画面双轨文字稿 + 深度总结分析。
-version: 1.0.6
+version: 1.0.7
 author: sensedeal
 tags: [cue, youtube, 视频解析, 视频转文字, 转文字, 字幕, 转录, 摘要, 说话人分离, 视觉理解, multimodal, omni-reader]
 ---
@@ -167,6 +167,8 @@ print('剩余积分 =', round(a + q, 2), '（可用', a, '+ 永久', q, '）')
 
 告知用户等待时长后调用 `parse`（参考实现见「解析调用手册」）。返回 `{"status":"processing","operation_id":"op_..."}`，记下 `operation_id`。
 
+> **`processing` ≠ 失败（硬规则）**：首包返回 `status: processing`（部分客户端外层还带 `ok:false`）只代表任务已受理、正在解析，**不是失败**。必须拿着同一个 `operation_id` 继续调 `get_parse_status`，直到 `status=completed`；中途出现任何 `fetching`/`queued`/超时都继续轮询，不要重发 `parse`。
+
 > **唯一提交（纪律第一条）**：一次任务对同一链接**只调用一次 `parse`**。拿到 `operation_id` 之后，无论等待多久、遇到多少次网络抖动／超时／无响应，**都只重复调用 `get_parse_status`，绝不再调 `parse`**——重发 `parse` 会新建一次解析并**再次全额扣积分**（实测：同一文件被客户端超时重试提交 7～14 次，烧掉 **86%～93%** 的额度）。
 
 ### 步骤 2：轮询取回
@@ -321,16 +323,23 @@ def call(name, args, timeout=70):
             raise RuntimeError(json.dumps(r.get("error","unknown"), ensure_ascii=False))
     raise RuntimeError("无响应")
 
+STOP = {"completed", "failed", "cancelled", "canceled"}
+
 st = call("parse", {"source": url, "detail": "text"})     # 唯一一次提交
-op  = st.get("operation_id")
+op = st.get("operation_id")
+if not op:                                                 # 提交即失败（如 UNSUPPORTED_SOURCE / INSUFFICIENT_CREDITS）
+    raise RuntimeError(f"提交未建立任务: {st}")
 deadline = time.time() + 1200                              # 轮询上限 20 分钟
-while st.get("status") == "processing" and time.time() < deadline:
+# 只要不是终态就继续轮询：首包的 processing / fetching / queued 都属「处理中」，绝不当失败
+while str(st.get("status", "")).lower() not in STOP and time.time() < deadline:
     time.sleep(min(st.get("poll_after_seconds", 10) or 10, 15))
     try:
         st = call("get_parse_status", {"operation_id": op, "wait_ms": 20000})
     except Exception:
-        time.sleep(5)
+        time.sleep(5)                                      # 网络抖动只重试 get_parse_status，绝不重发 parse
         continue
+if str(st.get("status", "")).lower() != "completed":
+    raise RuntimeError(f"解析未完成 (operation_id={op}): {st}")
 r = st.get("result")
 text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or ""
 ```
@@ -340,6 +349,7 @@ text = r if isinstance(r, str) else (r or {}).get("text") or st.get("text") or "
 | 错误码 | 含义 | 处理 |
 |--------|------|------|
 | `REMOTE_REQUEST_REJECTED` | 多半是误走了本地 Bridge，或 URL 非规范链接 | 确认走远程端点、URL 已规范成 `watch?v=<ID>` |
+| `UNSUPPORTED_SOURCE` | 入口没把链接识别为「远程 HTTP(S) 源」（常见于没走远程端点，或 URL 被本地下载/改写后再提交） | 确认把原始 `watch?v=<ID>` 链接**直接**作为 `source` 交给远程端点；仍报则请用户核对链接 |
 | `SERVICE_TEMPORARILY_UNAVAILABLE` | 服务临时不可用（`retryable:true`） | 等 10 秒后用**原 `operation_id` 轮询 `get_parse_status`** 复用；**确无 operation 才重新 `parse`** |
 | `SOURCE_NOT_FOUND` | 视频删除/私有/地区限制 | 请用户核对链接与权限 |
 | `SOURCE_TOO_LARGE` | 超出上限 | 提示用户该视频过长，建议选用较短片段 |
